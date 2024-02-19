@@ -1,0 +1,18 @@
+{
+    "name": "npcap",
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "configure": "node-gyp configure",
+        "install": "node-gyp rebuild",
+        "build": "node-gyp build",
+        "dev": "esno lib/index.ts"
+    },
+    "devDependencies": {
+        "@ivanmaxlogiudice/eslint-config": "^1.0.23",
+        "@types/node": "^20.11.19",
+        "eslint": "^8.56.0",
+        "esno": "^4.0.0",
+        "typescript": "^5.3.3"
+    }
+}

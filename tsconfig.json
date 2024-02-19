@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        /* Language and Environment */
+        "target": "ESNext",
+        "lib": ["ESNext"],
+
+        /* Modules */
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "resolveJsonModule": true,
+
+        /* Type Checking */
+        "strict": true,
+        "strictNullChecks": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+
+        /* Interop Constraints */
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+
+        /* Completeness */
+        "skipLibCheck": true
+    },
+    "include": ["lib"]
+}
