@@ -27,6 +27,28 @@ static void loadNpcap(napi_env env) {
     printf("** %s\n", pcap_lib_version());
 }
 
+static void SetAddrStringHelper(napi_env env, napi_value addressObj, const char* key, sockaddr *addr) {
+    if (addr == nullptr) return;
+
+    char dst_addr[INET6_ADDRSTRLEN] = {0};
+    const char* address = nullptr;
+
+    if (addr->sa_family == AF_INET) {
+        address = inet_ntop(AF_INET, &(((struct sockaddr_in*)addr)->sin_addr), dst_addr, INET_ADDRSTRLEN);
+    } else {
+        address = inet_ntop(AF_INET6, &(((struct sockaddr_in6*)addr)->sin6_addr), dst_addr, INET6_ADDRSTRLEN);
+    }
+
+    if (address) {
+        napi_value temp;
+        napi_create_string_utf8(env, address, strlen(address), &temp);
+        napi_set_named_property(env, addressObj, key, temp);
+    }
+}
+
+/**
+ * @brief Retrieves the version of the Npcap.
+*/
 napi_value libVersion(napi_env env, napi_callback_info info) {
     napi_value version;
     napi_status status;
@@ -36,8 +58,11 @@ napi_value libVersion(napi_env env, napi_callback_info info) {
     return version;
 }
 
+/**
+ * @brief Retrieves a list of network devices along with their properties.
+*/
 napi_value deviceList(napi_env env, napi_callback_info info) {
-    char error[PCAP_ERRBUF_SIZE];
+    char error[PCAP_ERRBUF_SIZE] = {0};
     pcap_if_t *alldevs, *cur_dev;
 
     if (pcap_findalldevs(&alldevs, error) == -1 || alldevs == NULL)
@@ -48,6 +73,7 @@ napi_value deviceList(napi_env env, napi_callback_info info) {
         napi_throw_error(env, NULL, "Failed to create array for deviceList.");
         
     int i = 0, j = 0;
+    pcap_addr_t *cur_addr;
     for (cur_dev = alldevs ; cur_dev != NULL ; cur_dev = cur_dev->next, i++) {
         napi_value device;
         napi_create_object(env, &device);
@@ -59,84 +85,54 @@ napi_value deviceList(napi_env env, napi_callback_info info) {
         napi_create_string_utf8(env, cur_dev->description, NAPI_AUTO_LENGTH, &description);
         napi_set_named_property(env, device, "description", description);
 
-        // Addresses
         {
             napi_value addresses;
             napi_create_array(env, &addresses);
 
-            for (struct pcap_addr *addr = cur_dev->addresses; addr != NULL; addr = addr->next) {
-                napi_value address;
-                napi_create_object(env, &address);
+            for (j = 0, cur_addr = cur_dev->addresses; cur_addr != NULL; cur_addr = cur_addr->next) {
+                if (cur_addr->addr == nullptr) continue;
 
-                // Add address family
-                napi_value family;
-                napi_create_int32(env, addr->addr->sa_family, &family);
-                napi_set_named_property(env, address, "family", family);
+                int family = cur_addr->addr->sa_family;
+                if (family == AF_INET || family == AF_INET6) {
+                    napi_value address;
+                    napi_create_object(env, &address);
 
-                // Add address (you need to handle IPv4 and IPv6 addresses accordingly)
-                // For simplicity, let's assume you have IPv4 addresses
-                char ipAddr[INET_ADDRSTRLEN];
-                if (addr->addr->sa_family == AF_INET) {
-                    inet_ntop(AF_INET, &(((struct sockaddr_in *)addr->addr)->sin_addr), ipAddr, INET_ADDRSTRLEN);
-                    napi_value ip;
-                    napi_create_string_utf8(env, ipAddr, NAPI_AUTO_LENGTH, &ip);
-                    napi_set_named_property(env, address, "ip", ip);
+                    SetAddrStringHelper(env, address, "addr", cur_addr->addr);
+                    SetAddrStringHelper(env, address, "netmask", cur_addr->netmask);
+                    SetAddrStringHelper(env, address, "broadaddr", cur_addr->broadaddr);
+                    SetAddrStringHelper(env, address, "dstaddr", cur_addr->dstaddr);
+
+                    napi_set_element(env, addresses, j++, address);
                 }
-
-                // Push the address object into the addresses array
-                napi_set_element(env, addresses, j++, address);
             }
 
             napi_set_named_property(env, device, "addresses", addresses);
         }
 
-        napi_create_uint32(env, cur_dev->flags, &flags);
-        napi_set_named_property(env, device, "flags", flags);
+        if (cur_dev->flags & PCAP_IF_LOOPBACK) {
+            napi_get_boolean(env, true, &flags);
+            napi_set_named_property(env, device, "loopback", flags);
+        }
 
         napi_set_element(env, list, i, device);
     }
 
+    pcap_freealldevs(alldevs);
     return list;
-}
-
-napi_value bench(napi_env env, napi_callback_info info) {
-    napi_value array;
-    napi_create_array(env, &array);
-
-    napi_value foo, bar, hi;
-    napi_create_string_utf8(env, "foo", NAPI_AUTO_LENGTH, &foo);
-    napi_create_string_utf8(env, "bar", NAPI_AUTO_LENGTH, &bar);
-    napi_create_string_utf8(env, "hi", NAPI_AUTO_LENGTH, &hi);
-
-    napi_value obj;
-    napi_create_object(env, &obj);
-        
-    for (int i = 0; i < 100000; i++) {
-        napi_set_named_property(env, obj, "foo", foo);
-        napi_set_named_property(env, obj, "bar", bar);
-        napi_set_named_property(env, obj, "hi", hi);
-
-        napi_set_element(env, array, i, obj);
-    }
-
-    return NULL;
 }
 
 napi_value Init(napi_env env, napi_value exports) {
     loadNpcap(env);
     
-    napi_value fnLibVersion, fnDeviceList, fnBench;
+    napi_value fnLibVersion, fnDeviceList;
 
-    // libVersion(): string
+    // libVersion
     if (napi_ok != napi_create_function(env, "libVersion", NAPI_AUTO_LENGTH, libVersion, NULL, &fnLibVersion)) return NULL;
     if (napi_ok != napi_set_named_property(env, exports, "libVersion", fnLibVersion)) return NULL;
 
-    // deviceList(): ??
+    // deviceList
     if (napi_ok != napi_create_function(env, "deviceList", NAPI_AUTO_LENGTH, deviceList, NULL, &fnDeviceList)) return NULL;
     if (napi_ok != napi_set_named_property(env, exports, "deviceList", fnDeviceList)) return NULL;
-
-    if (napi_ok != napi_create_function(env, "bench", NAPI_AUTO_LENGTH, bench, NULL, &fnBench)) return NULL;
-    if (napi_ok != napi_set_named_property(env, exports, "bench", fnBench)) return NULL;
 
     return exports;
 }
