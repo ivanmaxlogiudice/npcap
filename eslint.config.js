@@ -8,4 +8,7 @@ export default config(
             'unicorn/filename-case': 'off',
         },
     },
+    {
+        'no-console': 'off',
+    },
 )
