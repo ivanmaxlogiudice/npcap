@@ -1,7 +1,5 @@
-import { createRequire } from 'node:module'
+import { npcap } from './npcap'
 
-const require = createRequire(import.meta.url)
-const addon = require('../build/Release/npcap.node')
-
-console.log(addon.deviceList())
-console.log(addon.findDevice('192.168.0.6'))
+console.log(npcap.libVersion())
+console.log(npcap.findDevice('192.168.0.6'))
+console.log(npcap.deviceList())

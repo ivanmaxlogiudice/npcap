@@ -29,9 +29,6 @@ static void loadNpcap(napi_env env) {
         );
         return;
     }
-
-    // Notify Npcap version.
-    printf("** %s\n", pcap_lib_version());
 }
 
 static const char* GetIpAddress(const struct sockaddr* addr) {
@@ -204,7 +201,7 @@ napi_value findDevice(napi_env env, napi_callback_info info) {
 
 napi_value Init(napi_env env, napi_value exports) {
     loadNpcap(env);
-    
+
     napi_value fnLibVersion, fnDeviceList, fnFindDevice;
 
     // libVersion
