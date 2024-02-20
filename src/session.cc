@@ -23,7 +23,7 @@ napi_value Session::Init(napi_env env, napi_value exports) {
     };
 
     napi_value cons;
-    assert(env, napi_ok == napi_define_class(env, "session", NAPI_AUTO_LENGTH, New, nullptr, 3, properties, &cons));
+    assert(env, napi_ok == napi_define_class(env, "session", NAPI_AUTO_LENGTH, New, nullptr, sizeof(properties) / sizeof(properties[0]), properties, &cons));
 
     /**
      * We will need the constructor `cons` later during the life cycle of the session,
