@@ -51,7 +51,21 @@ export interface Session {
         promiscuous: boolean
     ) => LinkType
 
+    /**
+     * 
+     * @param buffer 
+     * @param header 
+     * 
+     * @returns The amount of packets read.
+     */
+    dispatch: (buffer: Buffer, header: Buffer) => number
+
     close: () => void
+
+    /**
+     * This function is declared in the JS side.
+     */
+    readCallback: () => void
 }
 
 export interface SessionClass {

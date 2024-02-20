@@ -18,6 +18,7 @@ napi_value Session::Init(napi_env env, napi_value exports) {
     napi_property_descriptor properties[] = {
         declare_method("openLive", OpenLive),
         declare_method("openOffline", OpenOffline),
+        declare_method("dispatch", Dispatch),
 
         declare_method("close", Close)
     };
@@ -269,6 +270,69 @@ napi_value Session::Close(napi_env env, napi_callback_info info) {
     }
 
     return nullptr;
+}
+
+napi_value Session::Dispatch(napi_env env, napi_callback_info info) {
+    size_t argc = 2;
+    napi_value args[2], thisArg;
+    
+    // Get the arguments and validate the amount.
+    assert_call(env, napi_get_cb_info(env, info, &argc, args, &thisArg, nullptr));
+    assert_message(env, argc == 2, "Session::Dispatch: Expecting 2 arguments.");
+    
+    // Validate arguments
+    bool isBuffer;
+    assert_call(env, napi_is_buffer(env, args[0], &isBuffer));
+    assert_message(env, isBuffer == true, "Session::Dispatch: The parameter `buffer` must be a Buffer.");
+    
+    assert_call(env, napi_is_buffer(env, args[1], &isBuffer));
+    assert_message(env, isBuffer == true, "Session::Dispatch: The parameter `header` must be a Buffer.");
+    
+    size_t bufferLength;
+    char *bufferData, *headerData;
+    assert_call(env, napi_get_buffer_info(env, args[0], reinterpret_cast<void**>(&bufferData), &bufferLength));
+    assert_call(env, napi_get_buffer_info(env, args[1], reinterpret_cast<void**>(&headerData), nullptr));
+    
+    // Unwrap the `this` object to get the Session pointer.
+    Session* session;
+    assert_message(env, napi_ok == napi_unwrap(env, thisArg, reinterpret_cast<void**>(&session)), "Session::Dispatch: Can't unwrap the Session.");
+    
+    session->bufferData = bufferData;
+    session->bufferLength = bufferLength;
+    session->headerData = headerData;
+    
+    // TODO: Loop Starvation: https://github.com/node-pcap/node_pcap/issues/255
+    int packetCount;
+    do {
+        packetCount = pcap_dispatch(session->pcapHandle, 1, PacketReady, (u_char *)session);
+
+        if (packetCount == -2) {
+            FinalizeClose(env, session);
+        }
+    } while (packetCount > 0);
+    
+    napi_value count;
+    assert_call(env, napi_create_int32(env, packetCount, &count));
+    
+    return count;
+}
+
+void Session::FinalizeClose(napi_env env, Session *session) {
+    if (session->poolInit) {
+        uv_poll_stop(&session->pollHandle);
+        uv_unref((uv_handle_t*) &session->pollHandle);
+        
+        session->poolInit = false;
+
+        napi_delete_async_work(env, session->pollResource);
+        session->pollResource = nullptr;
+    }
+
+    pcap_close(session->pcapHandle);
+    session->pcapHandle = nullptr;
+
+    napi_delete_reference(env, session->packetReadyCb);
+    session->packetReadyCb = nullptr;
 }
 
 void Session::PacketReady(u_char *s, const struct pcap_pkthdr* pkthdr, const u_char* packet) {

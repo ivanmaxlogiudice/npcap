@@ -78,6 +78,8 @@ export class NpcapSession extends EventEmitter  {
 
     session: Session
     linkType: LinkType | undefined = undefined
+
+    emptyReads: number = 0
     
     constructor(live: boolean, public device: string, options: LiveSessionOptions) {
         super()
@@ -111,6 +113,16 @@ export class NpcapSession extends EventEmitter  {
                 warningHandler, 
                 promiscuous
             )
+            
+            // TODO: Another way to avoid this? (maybe https://github.com/mscdex/cap/blob/master/src/binding.cc#L288 ??)
+            this.session.readCallback = () => {
+                let readCount = this.session.dispatch(this.buffer, this.header)
+                if (readCount < 1) {
+                    this.emptyReads++
+                }
+            }
+
+            process.nextTick(this.session.readCallback) // Kickstart to prevent races
         }
     }
 
