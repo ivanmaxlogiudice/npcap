@@ -2,7 +2,11 @@
     "targets": [
         {
             "target_name": "npcap",
-            "sources": [ "src/binding.cc" ],
+            "sources": [
+                "src/common.cc",
+                "src/binding.cc", 
+                "src/session.cc"
+            ],
             "conditions": [
                 ["OS=='win'", {
                     "include_dirs": [

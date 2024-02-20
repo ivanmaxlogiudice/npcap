@@ -3,6 +3,13 @@ import { createRequire } from 'node:module'
 const require = createRequire(import.meta.url)
 const addon = require('../build/Release/npcap.node')
 
+export type LinkType =
+    | 'LINKTYPE_NULL'
+    | 'LINKTYPE_ETHERNET'
+    | 'LINKTYPE_IEEE802_11_RADIO'
+    | 'LINKTYPE_RAW'
+    | 'LINKTYPE_LINUX_SLL'
+
 export interface Address {
     addr: string
     netmask: string
@@ -12,9 +19,43 @@ export interface Address {
 
 export interface Device {
     name: string
-    description: string
+    description?: string
     addresses: Address[]
     loopback?: boolean
+}
+
+export interface Session {
+    openLive: (
+        device: string,
+        filter: string,
+        bufferSize: number,
+        snapLength: number,
+        outFile: string,
+        onPacketReady: () => void,
+        monitor: boolean,
+        bufferTimeout: number,
+        warningHandler: (message: string) => void,
+        promiscuous: boolean
+    ) => LinkType,
+
+    openOffline: (
+        device: string,
+        filter: string,
+        bufferSize: number,
+        snapLength: number,
+        outFile: string,
+        onPacketReady: () => void,
+        monitor: boolean,
+        bufferTimeout: number,
+        warningHandler: (message: string) => void,
+        promiscuous: boolean
+    ) => LinkType
+
+    close: () => void
+}
+
+export interface SessionClass {
+    new(): Session
 }
 
 export interface Npcap {
@@ -45,6 +86,8 @@ export interface Npcap {
      * @throws {Error} If there is an error searching for the device.
      */
     findDevice: (ip: string) => string | undefined
+
+    Session: SessionClass
 }
 
 export const npcap: Npcap = addon

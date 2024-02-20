@@ -5,30 +5,25 @@
 #include <winsock2.h>
 #include <string>
 
+#include "common.h"
+#include "session.h"
+
 static void loadNpcap(napi_env env) {
     char path[MAX_PATH] = {0};
 
-    if (GetSystemDirectoryA(path, MAX_PATH) == 0) {
-        napi_throw_error(env, NULL, "Failed to get the system directory.");
-        return;
-    }
+    assert_message_void(env, GetSystemDirectoryA(path, MAX_PATH) != 0, "Failed to get the system directory.");
 
     strcat(path, "\\Npcap");
 
-    if (SetDllDirectoryA(path) == 0) {
-        napi_throw_error(env, NULL, "Failed to set the NPCap directory.");
-        return;
-    }
-
-    if (LoadLibraryA("wpcap.dll") == 0) {
-        napi_throw_error(env, NULL, 
-            "\n"
-            "  ERROR! Failed to load 'wpcap.dll'\n"
-            "  Have you installed the Npcap library? See https://npcap.com/#download\n"
-            "\n"
-        );
-        return;
-    }
+    assert_message_void(env, SetDllDirectoryA(path) != 0, "Failed to set the NPCap directory.");
+    assert_message_void(
+        env, 
+        LoadLibraryA("wpcap.dll") != 0,
+        "\n"
+        "  ERROR! Failed to load 'wpcap.dll'\n"
+        "  Have you installed the Npcap library? See https://npcap.com/#download\n"
+        "\n"
+    );
 }
 
 static const char* GetIpAddress(const struct sockaddr* addr) {
@@ -64,10 +59,7 @@ static void SetAddrStringHelper(napi_env env, napi_value addressObj, const char*
 */
 napi_value libVersion(napi_env env, napi_callback_info info) {
     napi_value version;
-    napi_status status;
-
-    status = napi_create_string_utf8(env, pcap_lib_version(), NAPI_AUTO_LENGTH, &version);
-    if (status != napi_ok) return nullptr;
+    assert_call(env, napi_create_string_utf8(env, pcap_lib_version(), NAPI_AUTO_LENGTH, &version));
 
     return version;
 }
@@ -79,16 +71,15 @@ napi_value deviceList(napi_env env, napi_callback_info info) {
     char error[PCAP_ERRBUF_SIZE] = {0};
     pcap_if_t *alldevs, *cur_dev;
 
-    if (pcap_findalldevs(&alldevs, error) == -1 || alldevs == NULL) {
+    if (pcap_findalldevs(&alldevs, error) == -1) {
         napi_throw_error(env, NULL, error);
         return nullptr;
     }
 
+    assert_message(env, alldevs != NULL, "Error: Unable to find any devices.");
+
     napi_value list;
-    if (napi_ok != napi_create_array(env, &list)) {
-        napi_throw_error(env, NULL, "Failed to create array for deviceList.");
-        return nullptr;
-    }
+    assert_call(env, napi_create_array(env, &list));
         
     int i = 0, j = 0;
     pcap_addr_t *cur_addr;
@@ -141,35 +132,26 @@ napi_value deviceList(napi_env env, napi_callback_info info) {
 
 napi_value findDevice(napi_env env, napi_callback_info info) {
     size_t argc = 1;
-    napi_value argv[1], device;
-    napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value args[1], device;
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
 
-    if (argc < 1) {
-        napi_throw_error(env, nullptr, "Invalid number of arguments. Must provide 1 argument.");
-        return nullptr;
-    }
+    assert_message(env, argc >= 1, "Invalid number of arguments. Must provide 1 argument." );
 
     napi_valuetype type;
-    napi_typeof(env, argv[0], &type);
-
-    if (type != napi_string) {
-        napi_throw_error(env, nullptr, "The argument must be a string.");
-        return nullptr;
-    }
-
-    // Get the string value from the argument
-    size_t ipSize;
-    napi_get_value_string_utf8(env, argv[0], nullptr, 0, &ipSize);
-    std::string ip(ipSize, '\0');
-    napi_get_value_string_utf8(env, argv[0], &ip[0], ipSize + 1, nullptr);
+    napi_typeof(env, args[0], &type);
+    assert_message(env, napi_string == type, "The argument must be a string.");
+    
+    const char* ip = GetStringFromArg(env, args[0]);
 
     char error[PCAP_ERRBUF_SIZE] = {0}, name[INET6_ADDRSTRLEN] = {0};
     pcap_if_t *alldevs;
 
-    if (pcap_findalldevs(&alldevs, error) == -1 || alldevs == NULL) {
+    if (pcap_findalldevs(&alldevs, error) == -1) {
         napi_throw_error(env, NULL, error);
         return nullptr;
     }
+
+    assert_message(env, alldevs != NULL, "Error: Unable to find any devices.");
 
     bool found = false;
     pcap_if_t *cur_dev = nullptr;
@@ -184,8 +166,8 @@ napi_value findDevice(napi_env env, napi_callback_info info) {
             int family = cur_addr->addr->sa_family;
             if (family != AF_INET && family != AF_INET6) continue;
 
-            std::string ipAddress = GetIpAddress(cur_addr->addr);
-            if (ip != ipAddress) continue;
+            const char *ipAddress = GetIpAddress(cur_addr->addr);
+            if (strcmp(ip, ipAddress) != 0) continue;
 
             napi_create_string_utf8(env, cur_dev->name, strlen(cur_dev->name), &device);
             found = true;
@@ -202,6 +184,8 @@ napi_value findDevice(napi_env env, napi_callback_info info) {
 napi_value Init(napi_env env, napi_value exports) {
     loadNpcap(env);
 
+    Session::Init(env, exports);
+    
     napi_value fnLibVersion, fnDeviceList, fnFindDevice;
 
     // libVersion
