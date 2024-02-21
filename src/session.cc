@@ -19,6 +19,7 @@ napi_value Session::Init(napi_env env, napi_value exports) {
         declare_method("openLive", OpenLive),
         declare_method("openOffline", OpenOffline),
         declare_method("dispatch", Dispatch),
+        declare_method("startPolling", StartPolling),
 
         declare_method("close", Close)
     };
@@ -93,7 +94,15 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
     napi_value args[10], thisArg;
 
     napi_get_cb_info(env, info, &argc, args, &thisArg, nullptr);
-    // assert_message(env, argc == 10, "Session::Open: Expecting 10 arguments.");
+    assert_message(env, argc == 10, "Session::Open: Expecting 10 arguments.");
+
+    // Unwrap the `this` object to get the Session pointer.
+    Session* session;
+    assert_message(env, napi_ok == napi_unwrap(env, thisArg, reinterpret_cast<void**>(&session)), "Session::Open: Can't unwrap the Session.");
+
+    // Close previously open session.
+    if (session->pcapHandle)
+        session->Close(env, info);
 
     // Verify arguments
     napi_valuetype valueType;
@@ -147,10 +156,6 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
     bool monitor = GetBooleanFromArg(env, args[6]);
     int bufferTimeout = GetNumberFromArg(env, args[7]);
     bool promiscuous = GetNumberFromArg(env, args[9]);
-    
-    // Unwrap the `this` object to get the Session pointer.
-    Session* session;
-    assert_message(env, napi_ok == napi_unwrap(env, thisArg, reinterpret_cast<void**>(&session)), "Session::Open: Can't unwrap the Session.");
 
     napi_create_reference(env, args[5], 1, &session->packetReadyCb);
     session->pcapDumpHandle = nullptr;
@@ -217,8 +222,7 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
 
     int linkType = pcap_datalink(session->pcapHandle);
     napi_value returnValue;
-    char errbuf[PCAP_ERRBUF_SIZE];
-
+    
     switch (linkType) {
         case DLT_NULL:
             napi_create_string_utf8(env, "LINKTYPE_NULL", NAPI_AUTO_LENGTH, &returnValue);
@@ -236,8 +240,9 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
             napi_create_string_utf8(env, "LINKTYPE_LINUX_SLL", NAPI_AUTO_LENGTH, &returnValue);
             break;
         default:
-            snprintf(errbuf, PCAP_ERRBUF_SIZE, "Unknown linktype %d", linkType);
-            napi_create_string_utf8(env, errbuf, NAPI_AUTO_LENGTH, &returnValue);
+            char errorBuffer[PCAP_ERRBUF_SIZE];
+            snprintf(errorBuffer, PCAP_ERRBUF_SIZE, "Unknown linktype %d", linkType);
+            napi_create_string_utf8(env, errorBuffer, NAPI_AUTO_LENGTH, &returnValue);
             break;
     }
 
@@ -305,7 +310,7 @@ napi_value Session::Dispatch(napi_env env, napi_callback_info info) {
     int packetCount;
     do {
         packetCount = pcap_dispatch(session->pcapHandle, 1, PacketReady, (u_char *)session);
-
+        printf("packetCount: %d\n", packetCount);
         if (packetCount == -2) {
             FinalizeClose(env, session);
         }
@@ -335,6 +340,59 @@ void Session::FinalizeClose(napi_env env, Session *session) {
     session->packetReadyCb = nullptr;
 }
 
+static void CALLBACK OnPacket(void *data, BOOLEAN didTimeout) {
+    printf("Receive OnPacket\n");
+    if (didTimeout) {
+        printf("Warning: OnPacket timeout!");
+        return;
+    }
+
+    uv_async_t *async = (uv_async_t *)data;
+
+    if (uv_async_send(async) != 0) {
+        printf("Warning: OnPacket failed uv_async_send!");
+        return;
+    }
+}
+
+napi_value Session::StartPolling(napi_env env, napi_callback_info info) {
+    // Get context
+    napi_value thisArg;
+    assert_call(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisArg, nullptr));
+
+    // Unwrap the `this` object to get the Session pointer.
+    Session* session;
+    assert_message(env, napi_ok == napi_unwrap(env, thisArg, reinterpret_cast<void**>(&session)), "Session::StartPolling: Can't unwrap the Session.");
+
+    if (session->poolInit) return nullptr;
+
+    if (session->pcapHandle == nullptr) {
+        napi_throw_error(env, nullptr, "Session:StartPolling: Session already closed.");
+        return nullptr;
+    }
+
+    // TODO: Implements polling like https://github.com/mscdex/cap/blob/master/src/binding.cc#L400 ??
+    // Implementation for Windows
+    assert(env, uv_async_init(uv_default_loop(), &session->pollAsync, (uv_async_cb)PollHandler) == 0);
+    session->pollAsync.data = session;
+
+    RegisterWaitForSingleObject(
+        &session->pollWait,
+        pcap_getevent(session->pcapHandle),
+        OnPacket,
+        &session->pollAsync,
+        INFINITE,
+        WT_EXECUTEINWAITTHREAD
+    );
+
+    return nullptr;
+}
+
+void Session::PollHandler(uv_async_t *handle, int status) {
+    printf("Receive Packet\n");
+}
+
 void Session::PacketReady(u_char *s, const struct pcap_pkthdr* pkthdr, const u_char* packet) {
     printf("PacketReady called\n");
 }
+

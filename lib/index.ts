@@ -168,7 +168,7 @@ export const createOfflineSession = (path: string, options: OfflineSessionOption
     return new NpcapSession(false, path, options);
 }
 
-const session = createSession("\\Device\\NPF_{56761211-7574-48DB-952D-1E8C714F31E6}")
+const session = createSession("\\Device\\NPF_{56761211-7574-48DB-952D-1E8C714F31E6}", { filter: 'udp or tcp' })
 console.log(`Listening on ${session.device}, linkType: ${session.linkType}`)
 
 session.on('packet', (rawPacket) => {

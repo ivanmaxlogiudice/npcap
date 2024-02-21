@@ -48,6 +48,14 @@
         NULL                                                        \
     )
 
+#define assert_call_void(env, assertion)                            \
+    assert_base(                                                    \
+        env,                                                        \
+        (napi_ok == assertion),                                     \
+        "assertion (" #assertion ") failed",                        \
+        NODE_API_RETVAL_NOTHING                                     \
+    )
+
 #define declare_method(name, fn)                                    \
     { name, 0, fn, 0, 0, 0, napi_default, 0 }
 
