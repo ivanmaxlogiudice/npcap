@@ -9,6 +9,8 @@ export default config(
         },
     },
     {
-        'no-console': 'off',
+        rules: {
+            'no-console': 'off',
+        }
     },
 )
