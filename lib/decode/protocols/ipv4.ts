@@ -1,8 +1,5 @@
+import { protocols } from '../protocols'
 import { int8_to_dec } from '../utils'
-import { ICMP } from './icmp'
-import { IGMP } from './igmp'
-import { Tcp } from './tcp'
-import { Udp } from './udp'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
 
@@ -83,7 +80,7 @@ export class IPv4 {
     saddr?: IPv4Addr
     daddr?: IPv4Addr
     protocolName?: string
-    payload?: ICMP | IGMP | IPv4 | Tcp | Udp
+    payload?: any
 
     constructor(emitter?: EventEmitter) {
         this.emitter = emitter
@@ -130,25 +127,9 @@ export class IPv4 {
         offset = originalOffset + this.headerLength
 
         // https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
-        switch (this.protocol) {
-            case 1:
-                this.payload = new ICMP(this.emitter).decode(rawPacket, offset)
-                break
-            case 2:
-                this.payload = new IGMP(this.emitter).decode(rawPacket, offset)
-                break
-            case 4:
-                this.payload = new IPv4(this.emitter).decode(rawPacket, offset)
-                break
-            case 6:
-                this.payload = new Tcp(this.emitter).decode(rawPacket, offset, this.length - this.headerLength)
-                break
-            case 17:
-                this.payload = new Udp(this.emitter).decode(rawPacket, offset)
-                break
-            default:
-                this.protocolName = 'Unknown'
-        }
+        this.payload = protocols(this.protocol, this.emitter, rawPacket, offset, this.length - this.headerLength)
+        if (this.payload === undefined)
+            this.protocolName = 'Unknown'
 
         if (this.emitter)
             this.emitter.emit(IPv4.decoderName, this)
