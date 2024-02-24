@@ -106,10 +106,10 @@ describe('IPv4', () => {
             expect(instance.decode(buffer, 0)).toBe(instance)
         })
 
-        it(`raises a ${IPv4.name} event on decode`, () => {
+        it(`raises a ${IPv4.decoderName} event on decode`, () => {
             const handler = jest.fn()
 
-            emitter.on(instance.decoderName, handler)
+            emitter.on(IPv4.decoderName, handler)
             instance.decode(buffer, 0)
 
             expect(handler).toHaveBeenCalled()

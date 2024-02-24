@@ -168,7 +168,7 @@ export class TCPOptions {
 }
 
 export class Tcp {
-    decoderName = 'tcp'
+    static decoderName = 'tcp'
 
     emitter?: EventEmitter
 
@@ -242,7 +242,7 @@ export class Tcp {
         }
 
         if (this.emitter)
-            this.emitter.emit(this.decoderName, this)
+            this.emitter.emit(Tcp.decoderName, this)
 
         return this
     }

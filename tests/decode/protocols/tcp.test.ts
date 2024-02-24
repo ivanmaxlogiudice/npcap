@@ -23,10 +23,10 @@ describe('Tcp', () => {
             expect(instance.decode(buffer)).toBe(instance)
         })
 
-        it(`raises a ${Tcp.name} event on decode`, () => {
+        it(`raises a ${Tcp.decoderName} event on decode`, () => {
             const handler = jest.fn()
 
-            emitter.on(instance.decoderName, handler)
+            emitter.on(Tcp.decoderName, handler)
             instance.decode(buffer)
 
             expect(handler).toHaveBeenCalled()

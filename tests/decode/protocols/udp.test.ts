@@ -27,10 +27,10 @@ describe('Udp', () => {
             expect(instance.decode(buffer, 0)).toBe(instance)
         })
 
-        it(`raises a ${Udp.name} event on decode`, () => {
+        it(`raises a ${Udp.decoderName} event on decode`, () => {
             const handler = jest.fn()
 
-            emitter.on(instance.decoderName, handler)
+            emitter.on(Udp.decoderName, handler)
             instance.decode(buffer, 0)
 
             expect(handler).toHaveBeenCalled()

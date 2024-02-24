@@ -21,10 +21,10 @@ describe('IGMP', () => {
             expect(instance.decode(buffer)).toBe(instance)
         })
 
-        it(`raises a ${IGMP.name} event on decode`, () => {
+        it(`raises a ${IGMP.decoderName} event on decode`, () => {
             const handler = jest.fn()
 
-            emitter.on(instance.decoderName, handler)
+            emitter.on(IGMP.decoderName, handler)
             instance.decode(buffer)
 
             expect(handler).toHaveBeenCalled()

@@ -57,7 +57,7 @@ const codeMessage: Record<number, Record<number | 'default', string>> = {
 }
 
 export class ICMP {
-    decoderName = 'icmp'
+    static decoderName = 'icmp'
 
     emitter?: EventEmitter
     type: number = 0
@@ -75,7 +75,7 @@ export class ICMP {
         this.checksum = rawPacket.readUInt16BE(offset)
 
         if (this.emitter)
-            this.emitter.emit(this.decoderName, this)
+            this.emitter.emit(ICMP.decoderName, this)
 
         return this
     }

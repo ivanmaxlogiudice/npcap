@@ -19,7 +19,7 @@ const typeMessage: Record<number, string> = {
 }
 
 export class IGMP {
-    decoderName = 'igmp'
+    static decoderName = 'igmp'
 
     emitter?: EventEmitter
 
@@ -45,7 +45,7 @@ export class IGMP {
             this.version = typeVersion[this.type]
 
         if (this.emitter)
-            this.emitter.emit(this.decoderName, this)
+            this.emitter.emit(IGMP.decoderName, this)
 
         return this
     }

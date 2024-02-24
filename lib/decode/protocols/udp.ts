@@ -2,7 +2,7 @@ import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
 
 export class Udp {
-    decoderName = 'udp'
+    static decoderName = 'udp'
 
     emitter?: EventEmitter
     sport: number = 0
@@ -31,7 +31,7 @@ export class Udp {
         this.data = rawPacket.subarray(offset, offset + (this.length - 8))
 
         if (this.emitter)
-            this.emitter.emit(this.decoderName, this)
+            this.emitter.emit(Udp.decoderName, this)
 
         return this
     }

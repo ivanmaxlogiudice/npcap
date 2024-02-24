@@ -39,6 +39,8 @@ export class IPFlags {
 }
 
 export class IPv4Addr {
+    static decoderName = 'ipv4-addr'
+
     emitter?: EventEmitter
     addr: number[] = Array.from({ length: 4 })
 
@@ -52,6 +54,9 @@ export class IPv4Addr {
         this.addr[2] = rawPacket[offset + 2]
         this.addr[3] = rawPacket[offset + 3]
 
+        if (this.emitter)
+            this.emitter.emit(IPv4Addr.decoderName, this)
+
         return this
     }
 
@@ -61,7 +66,7 @@ export class IPv4Addr {
 }
 
 export class IPv4 {
-    decoderName = 'ipv4'
+    static decoderName = 'ipv4'
 
     emitter?: EventEmitter
 
@@ -146,7 +151,7 @@ export class IPv4 {
         }
 
         if (this.emitter)
-            this.emitter.emit(this.decoderName, this)
+            this.emitter.emit(IPv4.decoderName, this)
 
         return this
     }
