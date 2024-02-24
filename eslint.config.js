@@ -11,6 +11,9 @@ export default config(
     {
         rules: {
             'no-console': 'off',
-        }
+            'unicorn/filename-case': 'off',
+            'antfu/if-newline': 'off',
+            'perfectionist/sort-classes': 'off',
+        },
     },
 )

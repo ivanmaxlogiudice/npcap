@@ -1,71 +1,51 @@
 import { createRequire } from 'node:module'
+import type { Device, LinkType } from './types'
+import type { Buffer } from 'node:buffer'
 
 const require = createRequire(import.meta.url)
 const addon = require('../build/Release/npcap.node')
 
-export type LinkType =
-    | 'LINKTYPE_NULL'
-    | 'LINKTYPE_ETHERNET'
-    | 'LINKTYPE_IEEE802_11_RADIO'
-    | 'LINKTYPE_RAW'
-    | 'LINKTYPE_LINUX_SLL'
-
-export interface Address {
-    addr: string
-    netmask: string
-    broadaddr?: string
-    dstaddr?: string
-}
-
-export interface Device {
-    name: string
-    description?: string
-    addresses: Address[]
-    loopback?: boolean
-}
-
 export interface Session {
     openLive: (
         device: string,
+        onPacket: (copyLen: number, truncated: boolean) => void,
         filter: string,
         bufferSize: number,
-        snapLength: number,
+        header: Buffer,
+        buffer: Buffer,
+        snapLen: number,
         outFile: string,
-        onPacketReady: () => void,
         monitor: boolean,
-        bufferTimeout: number,
+        timeout: number,
         warningHandler: (message: string) => void,
         promiscuous: boolean
-    ) => LinkType,
+    ) => LinkType
 
     openOffline: (
         device: string,
+        onPacket: (copyLen: number, truncated: boolean) => void,
         filter: string,
         bufferSize: number,
-        snapLength: number,
+        header: Buffer,
+        buffer: Buffer,
+        snapLen: number,
         outFile: string,
-        onPacketReady: () => void,
         monitor: boolean,
-        bufferTimeout: number,
+        timeout: number,
         warningHandler: (message: string) => void,
         promiscuous: boolean
     ) => LinkType
 
     /**
-     * 
-     * @param buffer 
-     * @param header 
-     * 
+     *
+     * @param buffer
+     * @param header
+     *
      * @returns The amount of packets read.
      */
     dispatch: (buffer: Buffer, header: Buffer) => number
 
     close: () => void
-
-    /**
-     * This function is declared in the JS side.
-     */
-    readCallback: () => void
 }
 
 export interface SessionClass {

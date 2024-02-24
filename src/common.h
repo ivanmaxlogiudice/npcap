@@ -6,6 +6,20 @@
 // Empty value so that macros here are able to return NULL or void
 #define NODE_API_RETVAL_NOTHING // Intentionally blank #define
 
+#define throw_last_error(env)                                                               \
+     do {                                                                                   \
+        const napi_extended_error_info* error_info;                                         \
+        napi_get_last_error_info((env), &error_info);                                       \
+        bool isPending;                                                                     \
+        const char* message = error_info->error_message;                                    \
+        napi_is_exception_pending((env), &isPending);                                       \
+        /* If an exception is already pending, don't rethrow it */                          \
+        if (!isPending) {                                                                   \
+            const char* errorMessage = message != NULL ? message : "empty error message";   \
+            napi_throw_error((env), NULL, errorMessage);                                    \
+        }                                                                                   \
+    } while (0)                                                   
+
 #define assert_base(env, assertion, message, returnValue)           \
     do {                                                            \
         if (!(assertion)) {                                         \
@@ -40,21 +54,19 @@
 #define assert_message_void(env, assertion, message)                \
     assert_base(env, assertion, message, NODE_API_RETVAL_NOTHING)
 
+#define assert_call_base(env, assertion, returnValue)               \
+    do {                                                            \
+        if ((assertion) != napi_ok) {                               \
+            throw_last_error((env));                                \
+            return returnValue;                                     \
+        }                                                           \
+    } while (0)
+
 #define assert_call(env, assertion)                                 \
-    assert_base(                                                    \
-        env,                                                        \
-        (napi_ok == assertion),                                     \
-        "assertion (" #assertion ") failed",                        \
-        NULL                                                        \
-    )
+    assert_call_base(env, assertion, NULL)
 
 #define assert_call_void(env, assertion)                            \
-    assert_base(                                                    \
-        env,                                                        \
-        (napi_ok == assertion),                                     \
-        "assertion (" #assertion ") failed",                        \
-        NODE_API_RETVAL_NOTHING                                     \
-    )
+    assert_call_base(env, assertion, NODE_API_RETVAL_NOTHING)
 
 #define declare_method(name, fn)                                    \
     { name, 0, fn, 0, 0, 0, napi_default, 0 }
