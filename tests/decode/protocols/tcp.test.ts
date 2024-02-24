@@ -23,7 +23,7 @@ describe('Tcp', () => {
             expect(instance.decode(buffer)).toBe(instance)
         })
 
-        it(`raises a ${instance.decoderName} event on decode`, () => {
+        it(`raises a ${Tcp.name} event on decode`, () => {
             const handler = jest.fn()
 
             emitter.on(instance.decoderName, handler)
@@ -65,8 +65,10 @@ describe('Tcp', () => {
             expect(instance).toHaveProperty('windowSize', 4128)
             expect(instance).toHaveProperty('checksum', 17586)
             expect(instance).toHaveProperty('urgentPointer', 0)
-            expect(instance).toHaveProperty('dataLength', 0)
-            expect(instance).toHaveProperty('data', 0)
+
+            expect(instance.decode(buffer, 0, 24)).toHaveProperty('dataLength', 0)
+
+            expect(instance).toHaveProperty('data', null)
         })
     })
 
