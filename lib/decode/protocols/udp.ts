@@ -1,3 +1,4 @@
+import { DNS } from './dns'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
 
@@ -9,7 +10,7 @@ export class Udp {
     dport: number = 0
     length: number = 0
     checksum: number = 0
-    data?: Buffer
+    data!: Buffer
 
     constructor(emitter?: EventEmitter) {
         this.emitter = emitter
@@ -37,11 +38,10 @@ export class Udp {
     }
 
     toString() {
-        const ret = `UDP ${this.sport} -> ${this.dport} len ${this.length}`
-        if (Number(this.sport) === 53 || Number(this.dport) === 53) {
-            // TODO: Implement DNS
-            // ret += (new DNS().decode(this.data, 0, this.data.length).toString());
-        }
+        let ret = `UDP ${this.sport} -> ${this.dport} len ${this.length}`
+
+        if (Number(this.sport) === 53 || Number(this.dport) === 53)
+            ret += (new DNS().decode(this.data, 0).toString())
 
         return ret
     }
