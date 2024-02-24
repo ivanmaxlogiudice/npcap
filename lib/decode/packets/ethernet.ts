@@ -1,8 +1,8 @@
 import { ETHERNET_TYPE_IPV4, ETHERNET_TYPE_IPV6, ETHERNET_TYPE_VLAN } from '../../types'
 import { IPv4 } from '../protocols/ipv4'
 import { IPv6 } from '../protocols/ipv6'
+import { Vlan } from '../protocols/vlan'
 import { int8_to_hex as hex } from '../utils'
-import { Vlan } from '../vlan'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
 
