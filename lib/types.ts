@@ -97,3 +97,4 @@ export interface OfflineSessionOptions extends CommonSessionOptions {
 
 export const ETHERNET_TYPE_IPV4 = 0x800
 export const ETHERNET_TYPE_VLAN = 0x8100
+export const ETHERNET_TYPE_IPV6 = 0x86dd
