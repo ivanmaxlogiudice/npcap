@@ -1,4 +1,5 @@
-import { ETHERNET_TYPE_IPV4, ETHERNET_TYPE_IPV6, ETHERNET_TYPE_VLAN } from '../../types'
+import { ETHERNET_TYPE_ARP, ETHERNET_TYPE_IPV4, ETHERNET_TYPE_IPV6, ETHERNET_TYPE_VLAN } from '../../types'
+import { Arp } from '../protocols/arp'
 import { IPv4 } from '../protocols/ipv4'
 import { IPv6 } from '../protocols/ipv6'
 import { Vlan } from '../protocols/vlan'
@@ -8,6 +9,7 @@ import type EventEmitter from 'node:events'
 
 const typeMessage: Record<number, string> = {
     [ETHERNET_TYPE_IPV4]: 'IPv4',
+    [ETHERNET_TYPE_ARP]: 'Arp',
     [ETHERNET_TYPE_IPV6]: 'IPv6',
 }
 
@@ -36,7 +38,7 @@ export class EthernetPacket {
     shost?: EthernetAddr
     ethertype: number = 0
     vlan?: Vlan
-    payload?: IPv4 | IPv6
+    payload?: IPv4 | Arp | IPv6
 
     constructor(emitter?: EventEmitter) {
         this.emitter = emitter
@@ -70,6 +72,9 @@ export class EthernetPacket {
             switch (this.ethertype) {
                 case ETHERNET_TYPE_IPV4:
                     this.payload = new IPv4(this.emitter).decode(rawPacket, offset)
+                    break
+                case ETHERNET_TYPE_ARP:
+                    this.payload = new Arp(this.emitter).decode(rawPacket, offset)
                     break
                 case ETHERNET_TYPE_IPV6:
                     this.payload = new IPv6(this.emitter).decode(rawPacket, offset)
