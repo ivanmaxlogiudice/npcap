@@ -101,15 +101,12 @@ describe('IPv4', () => {
     })
 
     describe('#decode', () => {
-        it('is a function', () => {
+        it('is a function and returns the instance', () => {
             expect(instance.decode).toBeTypeOf('function')
-        })
-
-        it('returns the instance', () => {
             expect(instance.decode(buffer, 0)).toBe(instance)
         })
 
-        it('raises a Udp event on decode', () => {
+        it(`raises a ${IPv4.name} event on decode`, () => {
             const handler = jest.fn()
 
             emitter.on(instance.decoderName, handler)
