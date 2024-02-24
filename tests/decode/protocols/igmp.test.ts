@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from 'bun:test'
 import { Buffer } from 'node:buffer'
 import EventEmitter from 'node:events'
-import { IGMP } from '../../../lib/decode/protocols/iGMP'
+import { IGMP } from '../../../lib/decode/protocols/igmp'
 import { int8_to_hex } from '../../../lib/decode/utils'
 
 describe('IGMP', () => {
