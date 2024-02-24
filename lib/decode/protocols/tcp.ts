@@ -53,7 +53,7 @@ export class TCPOptions {
     mss?: number
     windowScale?: number
     sackOk?: boolean
-    sack: Array<number[]> = []
+    sack?: Array<number[]>
     timestamp?: number
     echo?: number
 
@@ -190,7 +190,7 @@ export class Tcp {
     }
 
     // http://en.wikipedia.org/wiki/Transmission_Control_Protocol
-    decode(rawPacket: Buffer, offset: number, len: number) {
+    decode(rawPacket: Buffer, offset: number = 0, len: number = 0) {
         const originalOffset = offset
 
         this.sport = rawPacket.readUInt16BE(offset) // 0, 1
@@ -248,7 +248,7 @@ export class Tcp {
     }
 
     toString() {
-        let ret = `${this.sport} -> ${this.dport} seq ${this.seqno} ack ${this.ackno} flags: ${this.flags} win ${this.windowSize} csum ${this.checksum}`
+        let ret = `${this.sport} -> ${this.dport} seq ${this.seqno} ack ${this.ackno} flags ${this.flags} win ${this.windowSize} csum ${this.checksum}`
 
         if (this.urgentPointer)
             ret += ` urg ${this.urgentPointer}`
