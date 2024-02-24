@@ -1,4 +1,5 @@
 import { int8_to_dec } from '../utils'
+import { ICMP } from './icmp'
 import { Tcp } from './tcp'
 import { Udp } from './udp'
 import type { Buffer } from 'node:buffer'
@@ -76,7 +77,7 @@ export class IPv4 {
     saddr?: IPv4Addr
     daddr?: IPv4Addr
     protocolName?: string
-    payload?: IPv4 | Tcp | Udp
+    payload?: ICMP | IPv4 | Tcp | Udp
 
     constructor(emitter?: EventEmitter) {
         this.emitter = emitter
@@ -124,6 +125,9 @@ export class IPv4 {
 
         // https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
         switch (this.protocol) {
+            case 1:
+                this.payload = new ICMP(this.emitter).decode(rawPacket, offset)
+                break
             case 4:
                 this.payload = new IPv4(this.emitter).decode(rawPacket, offset)
                 break
