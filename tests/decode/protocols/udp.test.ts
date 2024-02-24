@@ -22,15 +22,12 @@ describe('Udp', () => {
     })
 
     describe('#decode', () => {
-        it('is a function', () => {
+        it('is a function and returns the instance', () => {
             expect(instance.decode).toBeTypeOf('function')
-        })
-
-        it('returns the instance', () => {
             expect(instance.decode(buffer, 0)).toBe(instance)
         })
 
-        it('raises a Udp event on decode', () => {
+        it(`raises a ${Udp.name} event on decode`, () => {
             const handler = jest.fn()
 
             emitter.on(instance.decoderName, handler)
@@ -39,30 +36,24 @@ describe('Udp', () => {
             expect(handler).toHaveBeenCalled()
         })
 
-        it('sets #sport to the source port', () => {
-            expect(instance.decode(buffer, 0)).toHaveProperty('sport', 1234)
-        })
+        it('should decode Udp packet correctly', () => {
+            instance.decode(buffer, 0)
 
-        it('sets #dport to the destination port', () => {
-            expect(instance.decode(buffer, 0)).toHaveProperty('dport', 1235)
-        })
-
-        it('sets #length to the length of the payload', () => {
-            expect(instance.decode(buffer, 0)).toHaveProperty('length', 9)
-        })
-
-        it('sets #data to the payload', () => {
-            expect(instance.decode(buffer, 0)).toHaveProperty('data', Buffer.from('30', 'hex'))
-        })
-
-        it('sets #checksum to the checksum', () => {
-            expect(instance.decode(buffer, 0)).toHaveProperty('checksum', 0xdf03)
+            expect(instance).toHaveProperty('sport', 1234)
+            expect(instance).toHaveProperty('dport', 1235)
+            expect(instance).toHaveProperty('length', 9)
+            expect(instance).toHaveProperty('data', Buffer.from('30', 'hex'))
+            expect(instance).toHaveProperty('checksum', 0xdf03)
         })
     })
 
     describe('#toString()', () => {
         it('is a function', () => {
             expect(instance.toString).toBeTypeOf('function')
+        })
+
+        it('should return correct string representation', () => {
+            expect(instance.decode(buffer, 0).toString()).toBe('UDP 1234 -> 1235 len 9')
         })
     })
 })
