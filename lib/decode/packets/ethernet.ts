@@ -1,4 +1,4 @@
-import { ETHERNET_TYPE_ARP, ETHERNET_TYPE_IPV4, ETHERNET_TYPE_IPV6, ETHERNET_TYPE_VLAN } from '../../types'
+import { ETHERNET_TYPE_ARP, ETHERNET_TYPE_IPV4, ETHERNET_TYPE_IPV6, ETHERNET_TYPE_VLAN, EthernetTypeString } from '../../types'
 import { Arp } from '../protocols/arp'
 import { IPv4 } from '../protocols/ipv4'
 import { IPv6 } from '../protocols/ipv6'
@@ -6,12 +6,6 @@ import { Vlan } from '../protocols/vlan'
 import { int8_to_hex as hex } from '../utils'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
-
-const typeMessage: Record<number, string> = {
-    [ETHERNET_TYPE_IPV4]: 'IPv4',
-    [ETHERNET_TYPE_ARP]: 'Arp',
-    [ETHERNET_TYPE_IPV6]: 'IPv6',
-}
 
 export class EthernetAddr {
     addr: number[] = Array.from({ length: 4 })
@@ -33,16 +27,15 @@ export class EthernetAddr {
 }
 
 export class EthernetPacket {
-    emitter?: EventEmitter
     dhost?: EthernetAddr
     shost?: EthernetAddr
     ethertype: number = 0
     vlan?: Vlan
     payload?: IPv4 | Arp | IPv6
 
-    constructor(emitter?: EventEmitter) {
-        this.emitter = emitter
-    }
+    constructor(
+        public emitter?: EventEmitter,
+    ) { }
 
     decode(rawPacket: Buffer, offset: number = 0): EthernetPacket {
         this.dhost = new EthernetAddr(rawPacket, offset)
@@ -56,7 +49,7 @@ export class EthernetPacket {
 
         // VLAN-tagged (802.1Q)
         if (this.ethertype === ETHERNET_TYPE_VLAN) {
-            this.vlan = new Vlan().decode(rawPacket, offset)
+            this.vlan = new Vlan(this.emitter).decode(rawPacket, offset)
             offset += 2
 
             this.ethertype = rawPacket.readUInt16BE(offset)
@@ -94,8 +87,8 @@ export class EthernetPacket {
         if (this.vlan)
             ret += ` vlan ${this.vlan}`
 
-        if (this.ethertype in typeMessage)
-            ret += ` ${typeMessage[this.ethertype]}`
+        if (this.ethertype in EthernetTypeString)
+            ret += ` ${EthernetTypeString[this.ethertype]}`
         else
             ret += ` ethertype ${this.ethertype}`
 

@@ -1,6 +1,8 @@
 import type { LinkType, PacketData } from '../types'
 import { EthernetPacket } from './packets/ethernet'
 import { NullPacket } from './packets/null'
+import { RadioPacket } from './packets/radio'
+import { SLLPacket } from './packets/sll'
 import { IPv4 } from './protocols/ipv4'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
@@ -20,15 +22,13 @@ export class NpcapHeader {
 }
 
 export class NpcapPacket {
-    emitter?: EventEmitter
-
     linkType?: LinkType
     npcapHeader?: NpcapHeader
-    payload?: EthernetPacket | NullPacket | IPv4
+    payload?: EthernetPacket | NullPacket | IPv4 | RadioPacket | SLLPacket
 
-    constructor(emitter?: EventEmitter) {
-        this.emitter = emitter
-    }
+    constructor(
+        public emitter?: EventEmitter,
+    ) { }
 
     decode(packet: PacketData) {
         this.linkType = packet.linkType
@@ -45,6 +45,12 @@ export class NpcapPacket {
                 break
             case 'RAW':
                 this.payload = new IPv4(this.emitter).decode(buffer)
+                break
+            case 'IEEE802_11_RADIO':
+                this.payload = new RadioPacket(this.emitter).decode(buffer)
+                break
+            case 'LINUX_SLL':
+                this.payload = new SLLPacket(this.emitter).decode(buffer)
                 break
             default:
                 console.log(`[NpcapPacket] Unknown decode link type '${this.linkType}'.`)

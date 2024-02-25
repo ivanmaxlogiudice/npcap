@@ -5,18 +5,17 @@ import type EventEmitter from 'node:events'
 export class Udp {
     static decoderName = 'udp'
 
-    emitter?: EventEmitter
     sport: number = 0
     dport: number = 0
     length: number = 0
     checksum: number = 0
     data!: Buffer
 
-    constructor(emitter?: EventEmitter) {
-        this.emitter = emitter
-    }
+    constructor(
+        public emitter?: EventEmitter,
+    ) { }
 
-    decode(rawPacket: Buffer, offset: number) {
+    decode(rawPacket: Buffer, offset: number = 0) {
         this.sport = rawPacket.readUInt16BE(offset)
         offset += 2
 

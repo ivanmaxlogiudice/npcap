@@ -60,7 +60,7 @@ describe('IPv4Addr', () => {
         })
 
         it('should decode address correctly', () => {
-            expect(instance.decode(buffer, 0)).toHaveProperty('addr', [192, 168, 1, 1])
+            expect(instance.decode(buffer)).toHaveProperty('addr', [192, 168, 1, 1])
         })
     })
 
@@ -70,7 +70,7 @@ describe('IPv4Addr', () => {
         })
 
         it('should return correct string representation', () => {
-            expect(instance.decode(buffer, 0).toString()).toBe('192.168.1.1')
+            expect(instance.decode(buffer).toString()).toBe('192.168.1.1')
 
             instance.addr = [192, 168, 1, 1]
             expect(instance.toString()).toBe('192.168.1.1')
@@ -103,20 +103,20 @@ describe('IPv4', () => {
     describe('#decode', () => {
         it('is a function and returns the instance', () => {
             expect(instance.decode).toBeTypeOf('function')
-            expect(instance.decode(buffer, 0)).toBe(instance)
+            expect(instance.decode(buffer)).toBe(instance)
         })
 
         it(`raises a ${IPv4.decoderName} event on decode`, () => {
             const handler = jest.fn()
 
             emitter.on(IPv4.decoderName, handler)
-            instance.decode(buffer, 0)
+            instance.decode(buffer)
 
             expect(handler).toHaveBeenCalled()
         })
 
         it('should decode IPv4 packet correctly', () => {
-            instance.decode(buffer, 0)
+            instance.decode(buffer)
 
             expect(instance).toHaveProperty('version', 4)
             expect(instance).toHaveProperty('headerLength', 24)

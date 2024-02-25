@@ -131,7 +131,6 @@ class DNSRRSet {
 export class DNS {
     static decoderName = 'dns'
 
-    emitter?: EventEmitter
     rawPacket!: Buffer
     offset: number = 0
     id?: number
@@ -146,9 +145,9 @@ export class DNS {
     additional?: DNSRRSet
     _error?: string
 
-    constructor(emitter?: EventEmitter) {
-        this.emitter = emitter
-    }
+    constructor(
+        public emitter?: EventEmitter,
+    ) { }
 
     // http://tools.ietf.org/html/rfc1035
     decode(rawPacket: Buffer, offset: number = 0) {

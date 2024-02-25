@@ -45,7 +45,7 @@ export class IPv4Addr {
         this.emitter = emitter
     }
 
-    decode(rawPacket: Buffer, offset: number) {
+    decode(rawPacket: Buffer, offset: number = 0) {
         this.addr[0] = rawPacket[offset]
         this.addr[1] = rawPacket[offset + 1]
         this.addr[2] = rawPacket[offset + 2]
@@ -65,8 +65,6 @@ export class IPv4Addr {
 export class IPv4 {
     static decoderName = 'ipv4'
 
-    emitter?: EventEmitter
-
     version: number = 0
     headerLength: number = 0
     diffserv: number = 0
@@ -82,9 +80,9 @@ export class IPv4 {
     protocolName?: string
     payload?: any
 
-    constructor(emitter?: EventEmitter) {
-        this.emitter = emitter
-    }
+    constructor(
+        public emitter?: EventEmitter,
+    ) { }
 
     // http://en.wikipedia.org/wiki/IPv4
     decode(rawPacket: Buffer, offset: number = 0) {

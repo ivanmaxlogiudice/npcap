@@ -21,17 +21,15 @@ const typeMessage: Record<number, string> = {
 export class IGMP {
     static decoderName = 'igmp'
 
-    emitter?: EventEmitter
-
     type!: number
     maxResponseTime!: number
     checksum!: number
     groupAddress!: IPv4Addr
     version: number = 0
 
-    constructor(emitter?: EventEmitter) {
-        this.emitter = emitter
-    }
+    constructor(
+        public emitter?: EventEmitter,
+    ) { }
 
     // IGMP v3
     // https://en.wikipedia.org/wiki/Internet_Group_Management_Protocol
