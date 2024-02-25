@@ -18,7 +18,7 @@ describe('IPv6Addr', () => {
         })
 
         it('should decode address correctly', () => {
-            expect(instance.decode(buffer, 0)).toHaveProperty('addr', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+            expect(instance.decode(buffer)).toHaveProperty('addr', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
         })
     })
 
@@ -28,7 +28,7 @@ describe('IPv6Addr', () => {
         })
 
         it('should return correct string representation', () => {
-            expect(instance.decode(buffer, 0).toString()).toBe('0001:0203:0405:0607:0809:0a0b:0c0d:0e0f')
+            expect(instance.decode(buffer).toString()).toBe('0001:0203:0405:0607:0809:0a0b:0c0d:0e0f')
         })
     })
 })
@@ -55,20 +55,20 @@ describe('IPv6', () => {
     describe('#decode', () => {
         it('is a function and returns the instance', () => {
             expect(instance.decode).toBeTypeOf('function')
-            expect(instance.decode(buffer, 0)).toBe(instance)
+            expect(instance.decode(buffer)).toBe(instance)
         })
 
         it(`raises a ${IPv6.decoderName} event on decode`, () => {
             const handler = jest.fn()
 
             emitter.on(IPv6.decoderName, handler)
-            instance.decode(buffer, 0)
+            instance.decode(buffer)
 
             expect(handler).toHaveBeenCalled()
         })
 
         it('should decode IPv6 packet correctly', () => {
-            instance.decode(buffer, 0)
+            instance.decode(buffer)
 
             expect(instance).toHaveProperty('version', 6)
             expect(instance).toHaveProperty('trafficClass', 0x12)

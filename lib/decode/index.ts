@@ -21,15 +21,13 @@ export class NpcapHeader {
 }
 
 export class NpcapPacket {
-    emitter?: EventEmitter
-
     linkType?: LinkType
     npcapHeader?: NpcapHeader
     payload?: EthernetPacket | NullPacket | IPv4 | SLLPacket
 
-    constructor(emitter?: EventEmitter) {
-        this.emitter = emitter
-    }
+    constructor(
+        public emitter?: EventEmitter,
+    ) { }
 
     decode(packet: PacketData) {
         this.linkType = packet.linkType

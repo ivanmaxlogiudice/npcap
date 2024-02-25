@@ -24,20 +24,20 @@ describe('Udp', () => {
     describe('#decode', () => {
         it('is a function and returns the instance', () => {
             expect(instance.decode).toBeTypeOf('function')
-            expect(instance.decode(buffer, 0)).toBe(instance)
+            expect(instance.decode(buffer)).toBe(instance)
         })
 
         it(`raises a ${Udp.decoderName} event on decode`, () => {
             const handler = jest.fn()
 
             emitter.on(Udp.decoderName, handler)
-            instance.decode(buffer, 0)
+            instance.decode(buffer)
 
             expect(handler).toHaveBeenCalled()
         })
 
         it('should decode Udp packet correctly', () => {
-            instance.decode(buffer, 0)
+            instance.decode(buffer)
 
             expect(instance).toHaveProperty('sport', 1234)
             expect(instance).toHaveProperty('dport', 1235)
@@ -53,7 +53,7 @@ describe('Udp', () => {
         })
 
         it('should return correct string representation', () => {
-            expect(instance.decode(buffer, 0).toString()).toBe('UDP 1234 -> 1235 len 9')
+            expect(instance.decode(buffer).toString()).toBe('UDP 1234 -> 1235 len 9')
         })
     })
 })

@@ -4,16 +4,9 @@ import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
 
 export class IPv6Addr {
-    static decoderName = 'ipv6-addr'
-
-    emitter?: EventEmitter
     addr: number[] = Array.from({ length: 16 })
 
-    constructor(emitter?: EventEmitter) {
-        this.emitter = emitter
-    }
-
-    decode(rawPacket: Buffer, offset: number) {
+    decode(rawPacket: Buffer, offset: number = 0) {
         this.addr[0] = rawPacket[offset + 0]
         this.addr[1] = rawPacket[offset + 1]
         this.addr[2] = rawPacket[offset + 2]
@@ -31,9 +24,6 @@ export class IPv6Addr {
         this.addr[14] = rawPacket[offset + 14]
         this.addr[15] = rawPacket[offset + 15]
 
-        if (this.emitter)
-            this.emitter.emit(IPv6Addr.decoderName, this)
-
         return this
     }
 
@@ -48,7 +38,6 @@ export class IPv6Addr {
 export class IPv6 {
     static decoderName = 'ipv6'
 
-    emitter?: EventEmitter
     version!: number
     trafficClass!: number
     flowLabel!: number
@@ -60,9 +49,9 @@ export class IPv6 {
     payload?: any
     protocolName?: string
 
-    constructor(emitter?: EventEmitter) {
-        this.emitter = emitter
-    }
+    constructor(
+        public emitter?: EventEmitter,
+    ) { }
 
     // http://en.wikipedia.org/wiki/IPv6
     decode(rawPacket: Buffer, offset: number = 0) {

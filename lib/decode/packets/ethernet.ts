@@ -27,16 +27,15 @@ export class EthernetAddr {
 }
 
 export class EthernetPacket {
-    emitter?: EventEmitter
     dhost?: EthernetAddr
     shost?: EthernetAddr
     ethertype: number = 0
     vlan?: Vlan
     payload?: IPv4 | Arp | IPv6
 
-    constructor(emitter?: EventEmitter) {
-        this.emitter = emitter
-    }
+    constructor(
+        public emitter?: EventEmitter,
+    ) { }
 
     decode(rawPacket: Buffer, offset: number = 0): EthernetPacket {
         this.dhost = new EthernetAddr(rawPacket, offset)
@@ -50,7 +49,7 @@ export class EthernetPacket {
 
         // VLAN-tagged (802.1Q)
         if (this.ethertype === ETHERNET_TYPE_VLAN) {
-            this.vlan = new Vlan().decode(rawPacket, offset)
+            this.vlan = new Vlan(this.emitter).decode(rawPacket, offset)
             offset += 2
 
             this.ethertype = rawPacket.readUInt16BE(offset)

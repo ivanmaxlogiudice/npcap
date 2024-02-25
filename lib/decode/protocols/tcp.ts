@@ -170,8 +170,6 @@ export class TCPOptions {
 export class Tcp {
     static decoderName = 'tcp'
 
-    emitter?: EventEmitter
-
     sport?: number
     dport?: number
     seqno?: number
@@ -185,9 +183,9 @@ export class Tcp {
     dataLength?: number
     data?: Buffer | null
 
-    constructor(emitter?: EventEmitter) {
-        this.emitter = emitter
-    }
+    constructor(
+        public emitter?: EventEmitter,
+    ) { }
 
     // http://en.wikipedia.org/wiki/Transmission_Control_Protocol
     decode(rawPacket: Buffer, offset: number = 0, len: number = 0) {

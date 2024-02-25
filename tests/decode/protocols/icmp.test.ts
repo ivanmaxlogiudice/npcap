@@ -18,20 +18,20 @@ describe('ICMP', () => {
     describe('#decode', () => {
         it('is a function and returns the instance', () => {
             expect(instance.decode).toBeTypeOf('function')
-            expect(instance.decode(buffer, 0)).toBe(instance)
+            expect(instance.decode(buffer)).toBe(instance)
         })
 
         it(`raises a ${ICMP.decoderName} event on decode`, () => {
             const handler = jest.fn()
 
             emitter.on(ICMP.decoderName, handler)
-            instance.decode(buffer, 0)
+            instance.decode(buffer)
 
             expect(handler).toHaveBeenCalled()
         })
 
         it('should decode ICMP packet correctly', () => {
-            instance.decode(buffer, 0)
+            instance.decode(buffer)
 
             expect(instance).toHaveProperty('type', 1)
             expect(instance).toHaveProperty('code', 2)
