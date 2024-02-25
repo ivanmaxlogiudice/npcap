@@ -1,5 +1,6 @@
 import type { LinkType, PacketData } from '../types'
 import { EthernetPacket } from './packets/ethernet'
+import { NullPacket } from './packets/null'
 import { IPv4 } from './protocols/ipv4'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
@@ -23,7 +24,7 @@ export class NpcapPacket {
 
     linkType?: LinkType
     npcapHeader?: NpcapHeader
-    payload?: EthernetPacket | IPv4
+    payload?: EthernetPacket | NullPacket | IPv4
 
     constructor(emitter?: EventEmitter) {
         this.emitter = emitter
@@ -38,6 +39,9 @@ export class NpcapPacket {
         switch (this.linkType) {
             case 'ETHERNET':
                 this.payload = new EthernetPacket(this.emitter).decode(buffer)
+                break
+            case 'NULL':
+                this.payload = new NullPacket(this.emitter).decode(buffer)
                 break
             case 'RAW':
                 this.payload = new IPv4(this.emitter).decode(buffer)
