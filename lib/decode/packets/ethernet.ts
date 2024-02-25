@@ -80,6 +80,7 @@ export class EthernetPacket {
                     this.payload = new IPv6(this.emitter).decode(rawPacket, offset)
                     break
                 default:
+                    this.payload = undefined
                     console.log(`NpcapPacket: EthernetPacket() - Dont know how to decode ethertype ${this.ethertype}.`)
             }
         }
