@@ -55,8 +55,20 @@ export class NpcapSession extends TypedEventEmitter<{
             )
         }
         else {
-            // TODO: Offline Session
-            this.linkType = 'ETHERNET'
+            this.linkType = this.session.openOffline(
+                device,
+                onPacket,
+                filter,
+                bufferSize,
+                this.header,
+                this.buffer,
+                snapLen,
+                outFile,
+                monitor,
+                timeout,
+                warningHandler,
+                promiscuous,
+            )
         }
     }
 
@@ -99,17 +111,4 @@ export function createOfflineSession(path: string, options: OfflineSessionOption
     return new NpcapSession(false, path, options)
 }
 
-const session = createSession('\\Device\\NPF_{56761211-7574-48DB-952D-1E8C714F31E6}', { filter: 'udp and port 5056' })
-console.log(`Listening on ${session.device}, linkType: ${session.linkType}`)
-session.on('packet', (data) => {
-    const packet = decode(data)
-    if (packet.linkType !== 'ETHERNET')
-        return
-
-    // console.log(packet)
-})
-
-setTimeout(() => {
-    console.log('Close connection')
-    session.close()
-}, 10_000)
+export { decode, npcap }
