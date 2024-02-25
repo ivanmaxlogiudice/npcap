@@ -1,4 +1,4 @@
-import { ETHERNET_TYPE_ARP, ETHERNET_TYPE_IPV4, ETHERNET_TYPE_IPV6, ETHERNET_TYPE_VLAN } from '../../types'
+import { ETHERNET_TYPE_ARP, ETHERNET_TYPE_IPV4, ETHERNET_TYPE_IPV6, ETHERNET_TYPE_VLAN, EthernetTypeString } from '../../types'
 import { Arp } from '../protocols/arp'
 import { IPv4 } from '../protocols/ipv4'
 import { IPv6 } from '../protocols/ipv6'
@@ -6,12 +6,6 @@ import { Vlan } from '../protocols/vlan'
 import { int8_to_hex as hex } from '../utils'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
-
-const typeMessage: Record<number, string> = {
-    [ETHERNET_TYPE_IPV4]: 'IPv4',
-    [ETHERNET_TYPE_ARP]: 'Arp',
-    [ETHERNET_TYPE_IPV6]: 'IPv6',
-}
 
 export class EthernetAddr {
     addr: number[] = Array.from({ length: 4 })
@@ -94,8 +88,8 @@ export class EthernetPacket {
         if (this.vlan)
             ret += ` vlan ${this.vlan}`
 
-        if (this.ethertype in typeMessage)
-            ret += ` ${typeMessage[this.ethertype]}`
+        if (this.ethertype in EthernetTypeString)
+            ret += ` ${EthernetTypeString[this.ethertype]}`
         else
             ret += ` ethertype ${this.ethertype}`
 

@@ -99,3 +99,9 @@ export const ETHERNET_TYPE_IPV4 = 0x800
 export const ETHERNET_TYPE_ARP = 0x806
 export const ETHERNET_TYPE_VLAN = 0x8100
 export const ETHERNET_TYPE_IPV6 = 0x86dd
+
+export const EthernetTypeString: Record<number, string> = {
+    [ETHERNET_TYPE_IPV4]: 'IPv4',
+    [ETHERNET_TYPE_ARP]: 'Arp',
+    [ETHERNET_TYPE_IPV6]: 'IPv6',
+}
