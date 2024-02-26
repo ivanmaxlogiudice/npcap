@@ -438,7 +438,7 @@ napi_value Session::Inject(napi_env env, napi_callback_info info) {
 }
 
 napi_value Session::Close(napi_env env, napi_callback_info info) {
-    napi_value thisArg, returnValue;
+    napi_value thisArg;
     assert_call(env, napi_get_cb_info(env, info, NULL, NULL, &thisArg, NULL));
     
     // Unwrap the `this` object to get the Session pointer.
@@ -461,10 +461,8 @@ napi_value Session::Close(napi_env env, napi_callback_info info) {
         session->closing = true;
         session->Cleanup();
         
-        napi_create_int32(env, 1, &returnValue);
-    } else {
-        napi_create_int32(env, 0, &returnValue);
-    }
-    
-    return returnValue;
+        return ReturnBoolean(env, true);
+    } 
+
+    return ReturnBoolean(env, false);
 }
