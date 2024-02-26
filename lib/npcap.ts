@@ -37,14 +37,8 @@ export interface Session {
     ) => LinkType
 
     /**
-     *
-     * @param buffer
-     * @param header
-     *
-     * @returns The amount of packets read.
+     * Close the session.
      */
-    dispatch: (buffer: Buffer, header: Buffer) => number
-
     close: () => void
 }
 
