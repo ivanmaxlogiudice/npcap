@@ -1,5 +1,10 @@
 import type { Buffer } from 'node:buffer'
 
+/**
+ * Format of the link-type headers.
+ *
+ * @see {@link https://www.tcpdump.org/linktypes.html | LinkType Headers}
+ */
 export type LinkType =
     | 'LINKTYPE_NULL'
     | 'LINKTYPE_ETHERNET'
@@ -33,7 +38,7 @@ export interface CommonSessionOptions {
      *
      * If not provided, all packets visible on the interface will be captured by default.
      *
-     * @see {@link https://npcap.com/guide/wpcap/pcap-filter.html|Npcap Filters Documentation}
+     * @see {@link https://npcap.com/guide/wpcap/pcap-filter.html | Npcap Filters Documentation}
      */
     filter?: string
 }
