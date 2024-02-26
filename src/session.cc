@@ -320,19 +320,19 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
     
     switch (linkType) {
         case DLT_NULL:
-            napi_create_string_utf8(env, "NULL", NAPI_AUTO_LENGTH, &returnValue);
+            napi_create_string_utf8(env, "LINKTYPE_NULL", NAPI_AUTO_LENGTH, &returnValue);
             break;
         case DLT_EN10MB: // Most wifi interfaces pretend to be "ethernet"
-            napi_create_string_utf8(env, "ETHERNET", NAPI_AUTO_LENGTH, &returnValue);
+            napi_create_string_utf8(env, "LINKTYPE_ETHERNET", NAPI_AUTO_LENGTH, &returnValue);
             break;
         case DLT_IEEE802_11_RADIO: // 802.11 "monitor mode"
-            napi_create_string_utf8(env, "IEEE802_11_RADIO", NAPI_AUTO_LENGTH, &returnValue);
+            napi_create_string_utf8(env, "LINKTYPE_IEEE802_11_RADIO", NAPI_AUTO_LENGTH, &returnValue);
             break;
         case DLT_RAW: // "raw IP"
-            napi_create_string_utf8(env, "RAW", NAPI_AUTO_LENGTH, &returnValue);
+            napi_create_string_utf8(env, "LINKTYPE_RAW", NAPI_AUTO_LENGTH, &returnValue);
             break;
         case DLT_LINUX_SLL:
-            napi_create_string_utf8(env, "LINUX_SLL", NAPI_AUTO_LENGTH, &returnValue);
+            napi_create_string_utf8(env, "LINKTYPE_LINUX_SLL", NAPI_AUTO_LENGTH, &returnValue);
             break;
         default:
             char errorBuffer[PCAP_ERRBUF_SIZE];

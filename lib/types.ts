@@ -1,11 +1,11 @@
 import type { Buffer } from 'node:buffer'
 
 export type LinkType =
-    | 'NULL'
-    | 'ETHERNET'
-    | 'IEEE802_11_RADIO'
-    | 'RAW'
-    | 'LINUX_SLL'
+    | 'LINKTYPE_NULL'
+    | 'LINKTYPE_ETHERNET'
+    | 'LINKTYPE_IEEE802_11_RADIO'
+    | 'LINKTYPE_RAW'
+    | 'LINKTYPE_LINUX_SLL'
 
 export interface Address {
     addr: string
