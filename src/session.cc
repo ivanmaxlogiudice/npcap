@@ -186,19 +186,19 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
     napi_valuetype valueType;
 
     // args[0]: { device: string }
-    napi_typeof(env, args[0], &valueType);
+    assert_call(env, napi_typeof(env, args[0], &valueType));
     assert_message(env, napi_string == valueType, "Session::Open: The argument `device` must be a String.");
 
     // args[1]: { onPacket: (buffer: Buffer) => void }
-    napi_typeof(env, args[1], &valueType);
+    assert_call(env, napi_typeof(env, args[1], &valueType));
     assert_message(env, napi_function == valueType, "Session::Open: The argument `onPacket` must be a Function (like: (buffer: Buffer) => void).");
 
     // args[2]: { filter: string }
-    napi_typeof(env, args[2], &valueType);
+    assert_call(env, napi_typeof(env, args[2], &valueType));
     assert_message(env, napi_string == valueType, "Session::Open: The argument `filter` must be a String.");
 
     // args[3]: { bufferSize: number }
-    napi_typeof(env, args[3], &valueType);
+    assert_call(env, napi_typeof(env, args[3], &valueType));
     assert_message(env, napi_number == valueType, "Session::Open: The argument `bufferSize` must be a Number.");
 
     // args[4]: { header: Buffer }
@@ -215,23 +215,23 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
     assert_message(env, napi_number == valueType, "Session::Open: The argument `snapLen` must be a Number.");
 
     // args[7]: { outFile: string }
-    napi_typeof(env, args[7], &valueType);
+    assert_call(env, napi_typeof(env, args[7], &valueType));
     assert_message(env, napi_string == valueType, "Session::Open: The argument `outFile` must be a String.");
 
     // args[8]: { monitor: boolean }
-    napi_typeof(env, args[8], &valueType);
+    assert_call(env, napi_typeof(env, args[8], &valueType));
     assert_message(env, napi_boolean == valueType, "Session::Open: The argument `monitor` must be a Boolean.");
 
     // args[9]: { timeout: number }
-    napi_typeof(env, args[9], &valueType);
+    assert_call(env, napi_typeof(env, args[9], &valueType));
     assert_message(env, napi_number == valueType, "Session::Open: The argument `timeout` must be a Number.");
 
     // args[10]: { warningHandler: (message: string) => void  }
-    napi_typeof(env, args[10], &valueType);
+    assert_call(env, napi_typeof(env, args[10], &valueType));
     assert_message(env, napi_function == valueType, "Session::Open: The argument `warningHandler` must be a Function (like: (message: string) => void).");
 
     // args[11]: { promiscuous: boolean }
-    napi_typeof(env, args[11], &valueType);
+    assert_call(env, napi_typeof(env, args[11], &valueType));
     assert_message(env, napi_boolean == valueType, "Session::Open: The argument `promiscuous` must be a Boolean.");
     
     // Unwrap the `this` object to get the Session pointer.
@@ -298,10 +298,7 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
             assert_message(env, session->pcapDumpHandle != nullptr, "Session::Open: Can't open output dump file.");
         }
 
-        if (pcap_setnonblock(session->pcapHandle, 1, errorBuffer) == -1) {
-            napi_throw_error(env, NULL, errorBuffer);
-            return nullptr;
-        }
+        assert_message(env, pcap_setnonblock(session->pcapHandle, 1, errorBuffer) != -1, errorBuffer);
     } else {
         // Device is the path to the savefile
         session->pcapHandle = pcap_open_offline(device, errorBuffer);
@@ -322,24 +319,24 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
     
     switch (linkType) {
         case DLT_NULL:
-            napi_create_string_utf8(env, "LINKTYPE_NULL", NAPI_AUTO_LENGTH, &returnValue);
+            assert_call(env, napi_create_string_utf8(env, "LINKTYPE_NULL", NAPI_AUTO_LENGTH, &returnValue));
             break;
         case DLT_EN10MB: // Most wifi interfaces pretend to be "ethernet"
-            napi_create_string_utf8(env, "LINKTYPE_ETHERNET", NAPI_AUTO_LENGTH, &returnValue);
+            assert_call(env, napi_create_string_utf8(env, "LINKTYPE_ETHERNET", NAPI_AUTO_LENGTH, &returnValue));
             break;
         case DLT_IEEE802_11_RADIO: // 802.11 "monitor mode"
-            napi_create_string_utf8(env, "LINKTYPE_IEEE802_11_RADIO", NAPI_AUTO_LENGTH, &returnValue);
+            assert_call(env, napi_create_string_utf8(env, "LINKTYPE_IEEE802_11_RADIO", NAPI_AUTO_LENGTH, &returnValue));
             break;
         case DLT_RAW: // "raw IP"
-            napi_create_string_utf8(env, "LINKTYPE_RAW", NAPI_AUTO_LENGTH, &returnValue);
+            assert_call(env, napi_create_string_utf8(env, "LINKTYPE_RAW", NAPI_AUTO_LENGTH, &returnValue));
             break;
         case DLT_LINUX_SLL:
-            napi_create_string_utf8(env, "LINKTYPE_LINUX_SLL", NAPI_AUTO_LENGTH, &returnValue);
+            assert_call(env, napi_create_string_utf8(env, "LINKTYPE_LINUX_SLL", NAPI_AUTO_LENGTH, &returnValue));
             break;
         default:
             char errorBuffer[PCAP_ERRBUF_SIZE];
             snprintf(errorBuffer, PCAP_ERRBUF_SIZE, "Unknown linktype %d", linkType);
-            napi_create_string_utf8(env, errorBuffer, NAPI_AUTO_LENGTH, &returnValue);
+            assert_call(env, napi_create_string_utf8(env, errorBuffer, NAPI_AUTO_LENGTH, &returnValue));
             break;
     }
 
@@ -368,7 +365,7 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
                       0,
                       nullptr);
         
-        napi_throw_error(env, NULL, errmsg);
+        assert_call(env, napi_throw_error(env, NULL, errmsg));
         return nullptr;
     }
     
@@ -415,7 +412,7 @@ napi_value Session::Inject(napi_env env, napi_callback_info info) {
     size_t argc = 1;
     napi_value args[1], thisArg;
 
-    napi_get_cb_info(env, info, &argc, args, &thisArg, nullptr);
+    assert_call(env, napi_get_cb_info(env, info, &argc, args, &thisArg, nullptr));
     assert_message(env, argc == 1, "Session::Inject: Expecting 1 arguments.");
 
     bool isBuffer;

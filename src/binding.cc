@@ -49,8 +49,8 @@ static void SetAddrStringHelper(napi_env env, napi_value addressObj, const char*
 
     if (address) {
         napi_value temp;
-        napi_create_string_utf8(env, address, strlen(address), &temp);
-        napi_set_named_property(env, addressObj, key, temp);
+        assert_call_void(env, napi_create_string_utf8(env, address, strlen(address), &temp));
+        assert_call_void(env, napi_set_named_property(env, addressObj, key, temp));
     }
 }
 
@@ -71,11 +71,7 @@ napi_value deviceList(napi_env env, napi_callback_info info) {
     char error[PCAP_ERRBUF_SIZE] = {0};
     pcap_if_t *alldevs, *cur_dev;
 
-    if (pcap_findalldevs(&alldevs, error) == -1) {
-        napi_throw_error(env, NULL, error);
-        return nullptr;
-    }
-
+    assert_message(env, pcap_findalldevs(&alldevs, error) != -1, error);
     assert_message(env, alldevs != NULL, "Error: Unable to find any devices.");
 
     napi_value list;
@@ -85,14 +81,14 @@ napi_value deviceList(napi_env env, napi_callback_info info) {
     pcap_addr_t *cur_addr;
     for (cur_dev = alldevs ; cur_dev != NULL ; cur_dev = cur_dev->next, i++) {
         napi_value device;
-        napi_create_object(env, &device);
+        assert_call(env, napi_create_object(env, &device));
 
         napi_value name, description, flags;
-        napi_create_string_utf8(env, cur_dev->name, NAPI_AUTO_LENGTH, &name);
-        napi_set_named_property(env, device, "name", name);
+        assert_call(env, napi_create_string_utf8(env, cur_dev->name, NAPI_AUTO_LENGTH, &name));
+        assert_call(env, napi_set_named_property(env, device, "name", name));
 
-        napi_create_string_utf8(env, cur_dev->description, NAPI_AUTO_LENGTH, &description);
-        napi_set_named_property(env, device, "description", description);
+        assert_call(env, napi_create_string_utf8(env, cur_dev->description, NAPI_AUTO_LENGTH, &description));
+        assert_call(env, napi_set_named_property(env, device, "description", description));
 
         {
             napi_value addresses;
@@ -104,26 +100,26 @@ napi_value deviceList(napi_env env, napi_callback_info info) {
                 int family = cur_addr->addr->sa_family;
                 if (family == AF_INET || family == AF_INET6) {
                     napi_value address;
-                    napi_create_object(env, &address);
+                    assert_call(env, napi_create_object(env, &address));
 
                     SetAddrStringHelper(env, address, "addr", cur_addr->addr);
                     SetAddrStringHelper(env, address, "netmask", cur_addr->netmask);
                     SetAddrStringHelper(env, address, "broadaddr", cur_addr->broadaddr);
                     SetAddrStringHelper(env, address, "dstaddr", cur_addr->dstaddr);
 
-                    napi_set_element(env, addresses, j++, address);
+                    assert_call(env, napi_set_element(env, addresses, j++, address));
                 }
             }
 
-            napi_set_named_property(env, device, "addresses", addresses);
+            assert_call(env, napi_set_named_property(env, device, "addresses", addresses));
         }
 
         if (cur_dev->flags & PCAP_IF_LOOPBACK) {
-            napi_get_boolean(env, true, &flags);
-            napi_set_named_property(env, device, "loopback", flags);
+            assert_call(env, napi_get_boolean(env, true, &flags));
+            assert_call(env, napi_set_named_property(env, device, "loopback", flags));
         }
 
-        napi_set_element(env, list, i, device);
+        assert_call(env, napi_set_element(env, list, i, device));
     }
 
     pcap_freealldevs(alldevs);
@@ -133,12 +129,12 @@ napi_value deviceList(napi_env env, napi_callback_info info) {
 napi_value findDevice(napi_env env, napi_callback_info info) {
     size_t argc = 1;
     napi_value args[1], device;
-    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    assert_call(env, napi_get_cb_info(env, info, &argc, args, nullptr, nullptr));
 
     assert_message(env, argc >= 1, "Invalid number of arguments. Must provide 1 argument." );
 
     napi_valuetype type;
-    napi_typeof(env, args[0], &type);
+    assert_call(env, napi_typeof(env, args[0], &type));
     assert_message(env, napi_string == type, "The argument must be a string.");
     
     const char* ip = GetStringFromArg(env, args[0]);
@@ -146,11 +142,7 @@ napi_value findDevice(napi_env env, napi_callback_info info) {
     char error[PCAP_ERRBUF_SIZE] = {0}, name[INET6_ADDRSTRLEN] = {0};
     pcap_if_t *alldevs;
 
-    if (pcap_findalldevs(&alldevs, error) == -1) {
-        napi_throw_error(env, NULL, error);
-        return nullptr;
-    }
-
+    assert_message(env, pcap_findalldevs(&alldevs, error) != -1, error);
     assert_message(env, alldevs != NULL, "Error: Unable to find any devices.");
 
     bool found = false;
@@ -169,7 +161,7 @@ napi_value findDevice(napi_env env, napi_callback_info info) {
             const char *ipAddress = GetIpAddress(cur_addr->addr);
             if (strcmp(ip, ipAddress) != 0) continue;
 
-            napi_create_string_utf8(env, cur_dev->name, strlen(cur_dev->name), &device);
+            assert_call(env, napi_create_string_utf8(env, cur_dev->name, strlen(cur_dev->name), &device));
             found = true;
             break;
         }
