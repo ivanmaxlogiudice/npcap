@@ -12,6 +12,24 @@ export type LinkType =
     | 'LINKTYPE_RAW'
     | 'LINKTYPE_LINUX_SLL'
 
+export interface CaptureStats {
+    /**
+     * Number of packets received.
+     */
+    ps_recv: number
+
+    /**
+     * Number of packets dropped by the network interface or its driver.
+     */
+    ps_ifdrop: number
+
+    /**
+     * Number of packets dropped because there was no room in the operating
+     * system's buffer when they arrived, because packets weren't being read fast enough.
+     */
+    ps_drop: number
+}
+
 export interface Address {
     addr: string
     netmask: string

@@ -19,6 +19,7 @@ napi_value Session::Init(napi_env env, napi_value exports) {
     napi_property_descriptor properties[] = {
         declare_method("openLive", OpenLive),
         declare_method("openOffline", OpenOffline),
+        declare_method("stats", Stats),
         declare_method("close", Close)
     };
 
@@ -380,6 +381,32 @@ napi_value Session::OpenLive(napi_env env, napi_callback_info info) {
 
 napi_value Session::OpenOffline(napi_env env, napi_callback_info info) {
     return Open(env, info, false);
+}
+
+napi_value Session::Stats(napi_env env, napi_callback_info info) {
+    napi_value thisArg;
+    assert_call(env, napi_get_cb_info(env, info, NULL, NULL, &thisArg, NULL));
+    
+    // Unwrap the `this` object to get the Session pointer.
+    Session* session;
+    assert_message(env, napi_ok == napi_unwrap(env, thisArg, reinterpret_cast<void**>(&session)), "Session::Open: Can't unwrap the Session.");
+
+    struct pcap_stat ps;
+    assert_message(env, pcap_stats(session->pcapHandle, &ps) != 1, pcap_geterr(session->pcapHandle));
+
+    napi_value stats, value;
+    assert_call(env, napi_create_object(env, &stats));
+
+    assert_call(env, napi_create_int32(env, ps.ps_recv, &value));
+    assert_call(env, napi_set_named_property(env, stats, "ps_recv", value));
+
+    assert_call(env, napi_create_int32(env, ps.ps_drop, &value));
+    assert_call(env, napi_set_named_property(env, stats, "ps_drop", value));
+
+    assert_call(env, napi_create_int32(env, ps.ps_ifdrop, &value));
+    assert_call(env, napi_set_named_property(env, stats, "ps_ifdrop", value));
+
+    return stats;
 }
 
 napi_value Session::Close(napi_env env, napi_callback_info info) {

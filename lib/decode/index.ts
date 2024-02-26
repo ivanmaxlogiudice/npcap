@@ -34,16 +34,16 @@ export class NpcapPacket {
         const buffer = packet.buffer.subarray(0, this.npcapHeader.caplen)
 
         switch (this.linkType) {
-            case 'ETHERNET':
+            case 'LINKTYPE_ETHERNET':
                 this.payload = new EthernetPacket(this.emitter).decode(buffer)
                 break
-            case 'NULL':
+            case 'LINKTYPE_NULL':
                 this.payload = new NullPacket(this.emitter).decode(buffer)
                 break
-            case 'RAW':
+            case 'LINKTYPE_RAW':
                 this.payload = new IPv4(this.emitter).decode(buffer)
                 break
-            case 'LINUX_SLL':
+            case 'LINKTYPE_LINUX_SLL':
                 this.payload = new SLLPacket(this.emitter).decode(buffer)
                 break
             default:

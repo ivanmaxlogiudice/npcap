@@ -1,29 +1,32 @@
 import { createRequire } from 'node:module'
-import type { Device, LinkType } from './types'
+import type { CaptureStats, Device, LinkType } from './types'
 import type { Buffer } from 'node:buffer'
 
 const require = createRequire(import.meta.url)
 const addon = require('../build/Release/npcap.node')
 
 export interface Session {
+    /**
+     * Opens a live connection for capturing network packets.
+     *
+     * @param {string} device - The name of the network interface to capture packets from.
+     * @param {() => void} onPacket - A callback function to handle captured packets.
+     * @param {string} filter - A filter expression for capturing specific packets.
+     * @param {number} bufferSize - The size of the buffer for capturing packets.
+     * @param {Buffer} header - The buffer for storing the header of captured packets.
+     * @param {Buffer} buffer - The buffer for storing captured packets.
+     * @param {number} snapLen - The maximum number of bytes to capture per packet.
+     * @param {string} outFile - The file path to write captured packets to.
+     * @param {boolean} monitor - Whether to capture in monitor mode.
+     * @param {number} timeout - The timeout duration for capturing packets.
+     * @param {(message: string) => void} warningHandler - A callback function to handle warnings.
+     * @param {boolean} promiscuous - Whether to set promiscuous mode for capturing packets.
+     *
+     * @returns {LinkType} The type of the link.
+     */
     openLive: (
         device: string,
-        onPacket: (copyLen: number, truncated: boolean) => void,
-        filter: string,
-        bufferSize: number,
-        header: Buffer,
-        buffer: Buffer,
-        snapLen: number,
-        outFile: string,
-        monitor: boolean,
-        timeout: number,
-        warningHandler: (message: string) => void,
-        promiscuous: boolean
-    ) => LinkType
-
-    openOffline: (
-        device: string,
-        onPacket: (copyLen: number, truncated: boolean) => void,
+        onPacket: () => void,
         filter: string,
         bufferSize: number,
         header: Buffer,
@@ -37,7 +40,69 @@ export interface Session {
     ) => LinkType
 
     /**
-     * Close the session.
+     * Opens an offline connection for processing captured network packets from a pcap file.
+     *
+     * @param {string} device - The path to the pcap file.
+     * @param {() => void} onPacket - A callback function to handle packets.
+     * @param {string} filter - A filter expression for capturing specific packets.
+     * @param {number} bufferSize - The size of the buffer for processing packets.
+     * @param {Buffer} header - The header buffer.
+     * @param {Buffer} buffer - The buffer for storing captured packets.
+     * @param {number} snapLen - The maximum number of bytes to capture per packet.
+     * @param {string} outFile - The file path to write captured packets to.
+     * @param {boolean} monitor - Whether to capture in monitor mode.
+     * @param {number} timeout - The timeout duration for capturing packets.
+     * @param {(message: string) => void} warningHandler - A callback function to handle warnings.
+     * @param {boolean} promiscuous - Whether to set promiscuous mode for capturing packets.
+     *
+     * @returns {LinkType} The type of the link.
+     */
+    openOffline: (
+        device: string,
+        onPacket: () => void,
+        filter: string,
+        bufferSize: number,
+        header: Buffer,
+        buffer: Buffer,
+        snapLen: number,
+        outFile: string,
+        monitor: boolean,
+        timeout: number,
+        warningHandler: (message: string) => void,
+        promiscuous: boolean
+    ) => LinkType
+
+    /**
+     * Get the current capture statistics.
+     *
+     * The statistics do not behave the same way on all platforms.
+     *
+     * `ps_recv` might count packets whether they passed the filter or not,
+     * or it might count only packets that pass the filter. It also might,
+     * or might not, count packets dropped because there was no room in the
+     * operating system's buffer when they arrived.
+     *
+     * `ps_drop` is not available on all platforms; it is zero on platforms
+     * where it's not available. If packet filtering is done in libpcap,
+     * rather than in the operating system, it would count packets that
+     * don't pass the filter.
+     *
+     * Both `ps_recv` and `ps_drop` might, or might not,
+     * count packets not yet read from the operating system and thus not
+     * yet seen by the application.
+     *
+     * `ps_ifdrop` might, or might not, be implemented;
+     * if it's zero, that might mean that no packets were dropped
+     * by the interface, or it might mean that the statistic is unavailable,
+     * so it should not be treated as an indication that the interface
+     * did not drop any packets.
+     */
+    stats: () => CaptureStats
+
+    /**
+     * Close the capture session.
+     *
+     * No more `packet` events will be emitted.
      */
     close: () => void
 }

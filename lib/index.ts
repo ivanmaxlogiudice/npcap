@@ -8,6 +8,8 @@ import { npcap } from './npcap'
 export class NpcapSession extends TypedEventEmitter<{
     packet: [packet: PacketData]
 }> {
+    device: string
+
     /** Raw packets bytes */
     buffer: Buffer
 
@@ -31,10 +33,11 @@ export class NpcapSession extends TypedEventEmitter<{
             promiscuous = true,
         } = options
 
+        this.device = device
         this.buffer = Buffer.alloc(snapLen)
         this.header = Buffer.alloc(16)
 
-        const onPacket = this.onPacket.bind(this)
+        const onPacket = this.#onPacket.bind(this)
 
         this.session = new npcap.Session()
 
@@ -72,21 +75,68 @@ export class NpcapSession extends TypedEventEmitter<{
         }
     }
 
+    /**
+     * Get the current capture statistics.
+     *
+     * The statistics do not behave the same way on all platforms.
+     *
+     * `ps_recv` might count packets whether they passed the filter or not,
+     * or it might count only packets that pass the filter. It also might,
+     * or might not, count packets dropped because there was no room in the
+     * operating system's buffer when they arrived.
+     *
+     * `ps_drop` is not available on all platforms; it is zero on platforms
+     * where it's not available. If packet filtering is done in libpcap,
+     * rather than in the operating system, it would count packets that
+     * don't pass the filter.
+     *
+     * Both `ps_recv` and `ps_drop` might, or might not,
+     * count packets not yet read from the operating system and thus not
+     * yet seen by the application.
+     *
+     * `ps_ifdrop` might, or might not, be implemented;
+     * if it's zero, that might mean that no packets were dropped
+     * by the interface, or it might mean that the statistic is unavailable,
+     * so it should not be treated as an indication that the interface
+     * did not drop any packets.
+     */
+    stats() {
+        return this.session.stats()
+    }
+
+    /**
+     * Close the capture session.
+     *
+     * No more `packet` events will be emitted.
+     */
     close() {
         this.removeAllListeners()
         this.session.close()
     }
 
-    onPacket() {
+    /**
+     * A callback function to handle Npcap warnings.
+     *
+     * This function can be overriden.
+     *
+     * @param message The warning that npcap will provide.
+     *
+     * @example
+     *
+     * session.warningHandler = (message: string) => {
+     *     console.log(`[Overrided warningHandler] ${message}`)
+     * }
+     */
+    warningHandler(message: string) {
+        console.log(`[warningHandler] ${message}`)
+    }
+
+    #onPacket() {
         this.emit('packet', {
             buffer: this.buffer,
             header: this.header,
             linkType: this.linkType,
         })
-    }
-
-    warningHandler(message: string) {
-        console.log(`[warningHandler] ${message}`)
     }
 }
 
