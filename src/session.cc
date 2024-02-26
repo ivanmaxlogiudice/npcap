@@ -391,6 +391,7 @@ napi_value Session::Stats(napi_env env, napi_callback_info info) {
     // Unwrap the `this` object to get the Session pointer.
     Session* session;
     assert_message(env, napi_ok == napi_unwrap(env, thisArg, reinterpret_cast<void**>(&session)), "Session::Open: Can't unwrap the Session.");
+    assert_message(env, session->pcapHandle != nullptr, "Session::Stats: The session is closed.");
 
     struct pcap_stat ps;
     assert_message(env, pcap_stats(session->pcapHandle, &ps) != 1, pcap_geterr(session->pcapHandle));
