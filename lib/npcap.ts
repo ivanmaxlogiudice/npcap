@@ -96,8 +96,20 @@ export interface Session {
      * by the interface, or it might mean that the statistic is unavailable,
      * so it should not be treated as an indication that the interface
      * did not drop any packets.
+     *
+     * @throws {Error} If failed to get stats.
      */
     stats: () => CaptureStats
+
+    /**
+     * Injects data into the network interface.
+     *
+     * @param {Buffer} data - The data to be injected into the network interface.
+     *
+     * @returns {boolean} Returns true if the injection is successful.
+     * @throws {Error} If injection fails.
+     */
+    inject: (data: Buffer) => boolean
 
     /**
      * Close the capture session.

@@ -20,6 +20,7 @@ napi_value Session::Init(napi_env env, napi_value exports) {
         declare_method("openLive", OpenLive),
         declare_method("openOffline", OpenOffline),
         declare_method("stats", Stats),
+        declare_method("inject", Inject),
         declare_method("close", Close)
     };
 
@@ -393,7 +394,7 @@ napi_value Session::Stats(napi_env env, napi_callback_info info) {
 
     struct pcap_stat ps;
     assert_message(env, pcap_stats(session->pcapHandle, &ps) != 1, pcap_geterr(session->pcapHandle));
-
+    
     napi_value stats, value;
     assert_call(env, napi_create_object(env, &stats));
 
@@ -407,6 +408,32 @@ napi_value Session::Stats(napi_env env, napi_callback_info info) {
     assert_call(env, napi_set_named_property(env, stats, "ps_ifdrop", value));
 
     return stats;
+}
+
+napi_value Session::Inject(napi_env env, napi_callback_info info) {
+    size_t argc = 1;
+    napi_value args[1], thisArg;
+
+    napi_get_cb_info(env, info, &argc, args, &thisArg, nullptr);
+    assert_message(env, argc == 1, "Session::Inject: Expecting 1 arguments.");
+
+    bool isBuffer;
+    assert_call(env, napi_is_buffer(env, args[0], &isBuffer));
+    assert_message(env, isBuffer == true, "Session::Inject: The parameter `data` must be a Buffer.");
+
+    // Unwrap the `this` object to get the Session pointer.
+    Session* session;
+    assert_message(env, napi_ok == napi_unwrap(env, thisArg, reinterpret_cast<void**>(&session)), "Session::Inject: Can't unwrap the Session.");
+    assert_message(env, session->pcapHandle != nullptr, "Session::Inject: The session is closed.");
+
+    char *bufferData = nullptr;
+    size_t bufferLength = 0;
+    assert_call(env, napi_get_buffer_info(env, args[0], reinterpret_cast<void**>(&bufferData), &bufferLength));
+    
+    assert_message(env, bufferLength > 0, "Session:Inject: The length of the buffer `data` must be greater than zero.");
+
+    assert_message(env, pcap_inject(session->pcapHandle, bufferData, bufferLength) == (int)bufferLength, pcap_geterr(session->pcapHandle));
+    return ReturnBoolean(env, true);
 }
 
 napi_value Session::Close(napi_env env, napi_callback_info info) {

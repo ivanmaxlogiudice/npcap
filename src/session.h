@@ -31,6 +31,7 @@ private:
     static napi_value OpenLive(napi_env env, napi_callback_info info);
     static napi_value OpenOffline(napi_env env, napi_callback_info info);
     static napi_value Stats(napi_env env, napi_callback_info info);
+    static napi_value Inject(napi_env env, napi_callback_info info);
     static napi_value Close(napi_env env, napi_callback_info info);
     
     static inline napi_value Constructor(napi_env env);

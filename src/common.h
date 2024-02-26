@@ -74,5 +74,5 @@
 const char* GetStringFromArg(napi_env env, napi_value arg);
 const int32_t GetNumberFromArg(napi_env env, napi_value arg);
 const bool GetBooleanFromArg(napi_env env, napi_value arg);
-
+napi_value ReturnBoolean(napi_env env, bool value);
 #endif

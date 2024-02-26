@@ -23,3 +23,10 @@ const bool GetBooleanFromArg(napi_env env, napi_value arg) {
 
     return isBoolean;
 }
+
+napi_value ReturnBoolean(napi_env env, bool value) {
+    napi_value returnValue;
+    assert_call(env, napi_get_boolean(env, value, &returnValue));
+
+    return returnValue;
+}
