@@ -4,7 +4,22 @@
     "description": "Native addon to capture & decode network packets.",
     "type": "module",
     "license": "MIT",
+    "homepage": "https://github.com/ivanmaxlogiudice/npcap",
+    "bugs": {
+        "url": "https://github.com/ivanmaxlogiudice/npcap/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ivanmaxlogiudice/npcap.git"
+    },
     "author": "Iván Máximiliano, Lo Giudice <ivanmaxlogiudice@gmail.com>",
+    "files": [
+        "binding.gyp",
+        "dist",
+        "src"
+    ],
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "scripts": {
         "configure": "node-gyp configure",
         "install": "node-gyp rebuild",
@@ -20,6 +35,9 @@
         "lint-staged": "^15.2.2",
         "simple-git-hooks": "^2.9.0",
         "typescript": "^5.3.3"
+    },
+    "engines": {
+        "node": ">=20.11.1"
     },
     "simple-git-hooks": {
         "pre-commit": "pnpm lint-staged"
