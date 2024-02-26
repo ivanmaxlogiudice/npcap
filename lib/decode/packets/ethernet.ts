@@ -1,9 +1,6 @@
-import { ETHERNET_TYPE_ARP, ETHERNET_TYPE_IPV4, ETHERNET_TYPE_IPV6, ETHERNET_TYPE_VLAN, EthernetTypeString } from '../../types'
-import { Arp } from '../protocols/arp'
-import { IPv4 } from '../protocols/ipv4'
-import { IPv6 } from '../protocols/ipv6'
-import { Vlan } from '../protocols/vlan'
-import { int8_to_hex as hex } from '../utils'
+import { int8_to_hex as hex } from '@/decode/utils'
+import { ETHERNET_TYPE_ARP, ETHERNET_TYPE_IPV4, ETHERNET_TYPE_IPV6, ETHERNET_TYPE_VLAN, EthernetTypeString } from '@/types'
+import { Arp, IPv4, IPv6, Vlan } from '../protocols'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
 

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from 'bun:test'
 import { Buffer } from 'node:buffer'
 import EventEmitter from 'node:events'
-import { Tcp } from '../../../lib/decode/protocols/tcp'
+import { Tcp } from '@/decode/protocols'
 
 describe('Tcp', () => {
     let emitter: EventEmitter

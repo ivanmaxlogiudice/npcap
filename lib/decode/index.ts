@@ -1,8 +1,6 @@
-import type { LinkType, PacketData } from '../types'
-import { EthernetPacket } from './packets/ethernet'
-import { NullPacket } from './packets/null'
-import { SLLPacket } from './packets/sll'
-import { IPv4 } from './protocols/ipv4'
+import type { LinkType, PacketData } from '@/types'
+import { EthernetPacket, NullPacket, SLLPacket } from './packets'
+import { IPv4 } from './protocols'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
 

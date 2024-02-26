@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
 import EventEmitter from 'node:events'
-import { EthernetAddr, EthernetPacket } from '../../../lib/decode/packets/ethernet'
-import { IPv4 } from '../../../lib/decode/protocols/ipv4'
-import { ETHERNET_TYPE_IPV4 } from '../../../lib/types'
+import { EthernetAddr, EthernetPacket } from '@/decode/packets'
+import { IPv4 } from '@/decode/protocols'
+import { ETHERNET_TYPE_IPV4 } from '@/types'
 
 describe('EthernetAddr', () => {
     let instance: EthernetAddr

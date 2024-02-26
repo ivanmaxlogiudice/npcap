@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
 import EventEmitter from 'node:events'
-import { DNS } from '../../../lib/decode/protocols/dns'
+import { DNS } from '@/decode/protocols'
 
 describe('DNS', () => {
     let emitter: EventEmitter

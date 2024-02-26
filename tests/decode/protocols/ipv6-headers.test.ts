@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
-import { HeaderExtension, NoNext } from '../../../lib/decode/protocols/ipv6-headers'
+import { HeaderExtension, NoNext } from '@/decode/protocols'
 
 describe('NoNext', () => {
     let instance: NoNext

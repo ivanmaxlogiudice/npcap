@@ -1,8 +1,7 @@
 import { beforeEach, describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
-import { NullPacket } from '../../../lib/decode/packets/null'
-import { IPv4 } from '../../../lib/decode/protocols/ipv4'
-import { IPv6 } from '../../../lib/decode/protocols/ipv6'
+import { NullPacket } from '@/decode/packets'
+import { IPv4, IPv6 } from '@/decode/protocols'
 
 describe('NullPacket', () => {
     let instance: NullPacket

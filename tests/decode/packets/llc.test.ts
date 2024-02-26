@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, jest } from 'bun:test'
 import { Buffer } from 'node:buffer'
 import EventEmitter from 'node:events'
-import { LLCPacket } from '../../../lib/decode/packets/llc'
-import { IPv4 } from '../../../lib/decode/protocols/ipv4'
+import { LLCPacket } from '@/decode/packets'
+import { IPv4 } from '@/decode/protocols'
 
 describe('LLCPacket', () => {
     let emitter: EventEmitter

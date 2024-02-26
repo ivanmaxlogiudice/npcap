@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from 'bun:test'
 import { Buffer } from 'node:buffer'
 import EventEmitter from 'node:events'
-import { Udp } from '../../../lib/decode/protocols/udp'
+import { Udp } from '@/decode/protocols'
 
 describe('Udp', () => {
     let emitter: EventEmitter

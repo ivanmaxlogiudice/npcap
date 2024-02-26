@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, jest } from 'bun:test'
 import { Buffer } from 'node:buffer'
 import EventEmitter from 'node:events'
-import { IGMP } from '../../../lib/decode/protocols/igmp'
-import { int8_to_hex } from '../../../lib/decode/utils'
+import { IGMP } from '@/decode/protocols'
+import { int8_to_hex } from '@/decode/utils'
 
 describe('IGMP', () => {
     let emitter: EventEmitter
@@ -49,7 +49,7 @@ describe('IGMP', () => {
     })
 
     describe('#toString', () => {
-        const verifyToString = function verifyToString(type, result) {
+        const verifyToString = function verifyToString(type: number, result: string) {
             instance.decode(Buffer.from(`${int8_to_hex[type]}000000000000"`, 'hex'), 0)
 
             expect(instance.toString()).toBe(result)

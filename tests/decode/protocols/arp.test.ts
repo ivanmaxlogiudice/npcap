@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
 import EventEmitter from 'node:events'
-import { Arp } from '../../../lib/decode/protocols/arp'
+import { Arp } from '@/decode/protocols'
 
 describe('ARP', () => {
     let emitter: EventEmitter

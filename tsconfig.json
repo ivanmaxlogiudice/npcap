@@ -7,6 +7,9 @@
         /* Modules */
         "module": "ESNext",
         "moduleResolution": "Bundler",
+        "paths": {
+            "@/*": ["./lib/*"]
+        },
         "resolveJsonModule": true,
 
         /* Type Checking */
@@ -15,6 +18,10 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true,
 
+        /* Emit */
+        "declaration": true,
+        "outDir": "dist",
+
         /* Interop Constraints */
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
@@ -22,5 +29,6 @@
         /* Completeness */
         "skipLibCheck": true
     },
-    "include": ["lib"]
+    "include": ["lib", "tests", "tests/decode/packets/sll.test.ts"],
+    "exclude": ["node_modules"]
 }

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from 'bun:test'
 import { Buffer } from 'node:buffer'
 import EventEmitter from 'node:events'
-import { IPv6, IPv6Addr } from '../../../lib/decode/protocols/ipv6'
+import { IPv6, IPv6Addr } from '@/decode/protocols'
 
 describe('IPv6Addr', () => {
     let instance: IPv6Addr

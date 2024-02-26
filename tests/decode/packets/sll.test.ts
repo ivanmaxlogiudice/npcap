@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'bun:test'
-import { SLLPacket } from '../../../lib/decode/packets/sll'
+import { SLLPacket } from '@/decode/packets'
 
 describe('SLLPacket', () => {
     let instance: SLLPacket

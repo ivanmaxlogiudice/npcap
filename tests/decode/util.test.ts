@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { int8_to_dec, int8_to_hex, int8_to_hex_nopad } from '../../lib/decode/utils'
+import { int8_to_dec, int8_to_hex, int8_to_hex_nopad } from '@/decode/utils'
 
 describe('util', () => {
     describe('int8_to_hex', () => {

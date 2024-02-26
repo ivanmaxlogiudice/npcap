@@ -1,4 +1,4 @@
-import { protocols } from '../protocols'
+import { protocols } from '../ip-protocols'
 import type { Buffer } from 'node:buffer'
 
 export class NoNext {

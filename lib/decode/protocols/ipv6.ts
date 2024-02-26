@@ -1,4 +1,4 @@
-import { protocols } from '../protocols'
+import { protocols } from '../ip-protocols'
 import { int8_to_hex as hex } from '../utils'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'

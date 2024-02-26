@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from 'bun:test'
 import { Buffer } from 'node:buffer'
 import EventEmitter from 'node:events'
-import { IPFlags, IPv4, IPv4Addr } from '../../../lib/decode/protocols/ipv4'
+import { IPFlags, IPv4, IPv4Addr } from '@/decode/protocols'
 
 describe('IPFlags', () => {
     let ipFlags: IPFlags
