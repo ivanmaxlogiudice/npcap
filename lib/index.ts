@@ -17,7 +17,7 @@ export class NpcapSession extends TypedEventEmitter<{
 
     session: Session
 
-    constructor(live: boolean, public device: string, options: LiveSessionOptions) {
+    constructor(live: boolean, device: string, options: LiveSessionOptions) {
         super()
 
         const {
@@ -73,6 +73,7 @@ export class NpcapSession extends TypedEventEmitter<{
     }
 
     close() {
+        this.removeAllListeners()
         this.session.close()
     }
 
