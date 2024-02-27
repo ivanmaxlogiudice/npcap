@@ -179,7 +179,7 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
 
             napi_value errorMessage, result;
             ASSERT_CALL(env, napi_create_string_utf8(env, errorBuffer, strlen(errorBuffer), &errorMessage));
-            ASSERT_CALL(env, napi_call_function(env, argv[10], argv[10], 1, &errorMessage, &result)); // TODO: Test this, if crash use napi_get_global and replace second argument.
+            ASSERT_CALL(env, napi_call_function(env, argv[10], argv[10], 1, &errorMessage, &result));
         }
 
         session->pcapHandle = pcap_create(device, errorBuffer);
