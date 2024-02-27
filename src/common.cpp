@@ -10,14 +10,14 @@ const char* GetStringFromArg(napi_env env, napi_value arg) {
     return buffer;
 }
 
-const int32_t GetNumberFromArg(napi_env env, napi_value arg) {
+int32_t GetNumberFromArg(napi_env env, napi_value arg) {
     int32_t number;
     napi_get_value_int32(env, arg, &number);
 
     return number;
 }
 
-const bool GetBooleanFromArg(napi_env env, napi_value arg) {
+bool GetBooleanFromArg(napi_env env, napi_value arg) {
     bool isBoolean;
     napi_get_value_bool(env, arg, &isBoolean);
 

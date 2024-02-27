@@ -1,11 +1,7 @@
 #ifndef NPCAP_SESSION_H
 #define NPCAP_SESSION_H
 
-#include <node_api.h>
-
-#if defined(_WIN32)
 #include <uv.h>
-#endif
 
 class Session {
     public:
@@ -55,7 +51,9 @@ class Session {
     #if defined(_WIN32)
         uv_async_t pollAsync;
         HANDLE pollWait;
+    #else
+        uv_poll_t pollHandle;
     #endif
 };
 
-#endif;
+#endif

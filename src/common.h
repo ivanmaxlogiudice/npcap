@@ -1,6 +1,8 @@
 #ifndef NAPI_COMMON_H
 #define NAPI_COMMON_H
 
+#include <pcap.h>
+#include <string.h>
 #include <node_api.h>
 
 // Empty value so that macros here are able to return NULL or void
@@ -77,7 +79,7 @@
     { name, 0, fn, 0, 0, 0, napi_default, 0 }
 
 const char* GetStringFromArg(napi_env env, napi_value arg);
-const int32_t GetNumberFromArg(napi_env env, napi_value arg);
-const bool GetBooleanFromArg(napi_env env, napi_value arg);
+int32_t GetNumberFromArg(napi_env env, napi_value arg);
+bool GetBooleanFromArg(napi_env env, napi_value arg);
 
 napi_value ReturnBoolean(napi_env env, bool value);

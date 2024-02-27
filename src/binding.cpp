@@ -1,9 +1,12 @@
-#include <pcap.h>
-
 #include "common.h"
 #include "session.h"
 
+#if defined(__unix__)
+#include <dlfcn.h>
+#endif
+
 void loadNpcap(napi_env env) {
+#if defined(_WIN32)
     char path[MAX_PATH] = {0};
    
     ASSERT_MESSAGE_VOID(env, GetSystemDirectoryA(path, MAX_PATH) != 0, "Failed to get the system directory.");
@@ -19,9 +22,23 @@ void loadNpcap(napi_env env) {
         "  Have you installed the Npcap library? See https://npcap.com/#download\n"
         "\n"
     );
+#else
+    void* handle = dlopen("libpcap.so", RTLD_LAZY);
+    if (handle) {
+        dlclose(handle);
+        return;
+    }
+
+    ASSERT_CALL_VOID(env, napi_throw_error(env, nullptr, 
+        "\n"
+        "  ERROR! Failed to load 'libpcap.so'\n"
+        "  Have you installed the library? sudo apt install libpcap-dev\n" // Need to install libpcap-dev??
+        "\n"
+    ))
+#endif
 }
 
-static const char* GetIpAddress(const struct sockaddr* addr) {
+const char* GetIpAddress(const struct sockaddr* addr) {
     char buffer[INET6_ADDRSTRLEN] = {0};
     const char* address = nullptr;
 
@@ -37,7 +54,7 @@ static const char* GetIpAddress(const struct sockaddr* addr) {
     return address;
 }
 
-static void SetAddrStringHelper(napi_env env, napi_value addressObj, const char* key, sockaddr *addr) {
+void SetAddrStringHelper(napi_env env, napi_value addressObj, const char* key, sockaddr *addr) {
     if (addr == nullptr) return;
 
     const char* address = GetIpAddress(addr);
@@ -134,7 +151,7 @@ napi_value findDevice(napi_env env, napi_callback_info info) {
     
     const char* ip = GetStringFromArg(env, args[0]);
 
-    char error[PCAP_ERRBUF_SIZE] = {0}, name[INET6_ADDRSTRLEN] = {0};
+    char error[PCAP_ERRBUF_SIZE] = {0};
     pcap_if_t *alldevs;
 
     ASSERT_MESSAGE(env, pcap_findalldevs(&alldevs, error) != -1, error);
@@ -168,10 +185,10 @@ napi_value findDevice(napi_env env, napi_callback_info info) {
     return device;
 }
 
-napi_value Init(napi_env env, napi_value exports) {
+napi_value Init(napi_env env, napi_value exports) {   
     loadNpcap(env);
 
-    Session::Init(env, exports);
+    // Session::Init(env, exports);
     
     napi_value fnLibVersion, fnDeviceList, fnFindDevice;
 

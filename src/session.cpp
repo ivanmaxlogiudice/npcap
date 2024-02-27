@@ -1,7 +1,5 @@
-#include <pcap.h>
-
-#include "session.h"
 #include "common.h"
+#include "session.h"
 
 napi_value Session::Init(napi_env env, napi_value exports) {
     napi_property_descriptor properties[] = {
@@ -187,7 +185,7 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
         ASSERT_MESSAGE(env, session->pcapHandle != nullptr, errorBuffer);
 
         // 64KB is the max IPv4 packet size
-        ASSERT_MESSAGE(env, pcap_set_snaplen(session->pcapHandle, 1) == 0, "Error with the setting 'snapLen'.");
+        ASSERT_MESSAGE(env, pcap_set_snaplen(session->pcapHandle, snapLen) == 0, "Error with the setting 'snapLen'.");
 
         // promiscuous?
         if (GetBooleanFromArg(env, argv[11])) {
@@ -288,8 +286,8 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
         return nullptr;
     }
 #else
-    session->fd = pcap_get_selectable_fd(session->pcapHandle);
-    ASSERT(env, uv_poll_init(uv_default_loop(), &session->pollHandle, session->fd) == 0);
+    auto fd = pcap_get_selectable_fd(session->pcapHandle);
+    ASSERT(env, uv_poll_init(uv_default_loop(), &session->pollHandle, fd) == 0);
     ASSERT(env, uv_poll_start(&session->pollHandle, UV_READABLE, CallbackPacket) == 0);
     session->pollHandle.data = session;
 #endif
@@ -377,6 +375,8 @@ napi_value Session::Close(napi_env env, napi_callback_info info) {
         }
 
         uv_close(reinterpret_cast<uv_handle_t*>(&session->pollAsync), CallbackClose);
+#else
+        uv_poll_stop(&session->pollHandle);
 #endif
 
         session->closing = true;
@@ -446,7 +446,7 @@ void Session::CallbackPacket(uv_poll_t* handle, int status, int events) {
         return session->Cleanup();
 
     if (!(events & UV_READABLE))
-        return
+        return;
     
     session->handlingPackets = true;
 
@@ -474,11 +474,11 @@ void Session::EmitPacket(u_char *s, const struct pcap_pkthdr* pkt_hdr, const u_c
         pcap_dump(reinterpret_cast<u_char*>(session->pcapDumpHandle), pkt_hdr, packet);
     }
 
-    bool truncated = false;
+    // bool truncated = false;
     size_t copyLen = pkt_hdr->caplen;
     if (copyLen > session->bufferLength) {
         copyLen = session->bufferLength;
-        truncated = true;
+        // truncated = true;
     }
 
     // Copy header data
