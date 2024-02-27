@@ -3,9 +3,9 @@
         {
             "target_name": "npcap",
             "sources": [
-                "src/common.cc",
-                "src/binding.cc", 
-                "src/session.cc"
+                "src/common.cpp",
+                "src/binding.cpp", 
+                "src/session.cpp"
             ],
             "conditions": [
                 ["OS=='win'", {
