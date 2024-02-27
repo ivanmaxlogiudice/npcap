@@ -99,8 +99,10 @@ napi_value deviceList(napi_env env, napi_callback_info info) {
         ASSERT_CALL(env, napi_create_string_utf8(env, cur_dev->name, NAPI_AUTO_LENGTH, &name));
         ASSERT_CALL(env, napi_set_named_property(env, device, "name", name));
 
-        ASSERT_CALL(env, napi_create_string_utf8(env, cur_dev->description, NAPI_AUTO_LENGTH, &description));
-        ASSERT_CALL(env, napi_set_named_property(env, device, "description", description));
+        if (cur_dev->description != nullptr) {
+            ASSERT_CALL(env, napi_create_string_utf8(env, cur_dev->description, NAPI_AUTO_LENGTH, &description));
+            ASSERT_CALL(env, napi_set_named_property(env, device, "description", description));
+        }
 
         {
             napi_value addresses;
