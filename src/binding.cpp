@@ -211,7 +211,7 @@ napi_value defaultDevice(napi_env env, napi_callback_info info) {
     ASSERT_MESSAGE(env, pcap_findalldevs(&devices, error) != -1, error);
     ASSERT_MESSAGE(env, devices != NULL, "Error: Unable to find any devices.");
 
-    napi_value defaultDevice;
+    napi_value defaultDevice = nullptr;
 
 #if defined(_WIN32)
     // TODO: Implement windows version.
