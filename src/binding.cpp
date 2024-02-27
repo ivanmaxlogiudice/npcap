@@ -1,22 +1,17 @@
-#include <node_api.h>
-#include <pcap/pcap.h>
-#include <windows.h>
-#include <stdio.h>
-#include <winsock2.h>
-#include <string>
+#include <pcap.h>
 
 #include "common.h"
 #include "session.h"
 
-static void loadNpcap(napi_env env) {
+void loadNpcap(napi_env env) {
     char path[MAX_PATH] = {0};
-
-    assert_message_void(env, GetSystemDirectoryA(path, MAX_PATH) != 0, "Failed to get the system directory.");
+   
+    ASSERT_MESSAGE_VOID(env, GetSystemDirectoryA(path, MAX_PATH) != 0, "Failed to get the system directory.");
 
     strcat(path, "\\Npcap");
 
-    assert_message_void(env, SetDllDirectoryA(path) != 0, "Failed to set the NPCap directory.");
-    assert_message_void(
+    ASSERT_MESSAGE_VOID(env, SetDllDirectoryA(path) != 0, "Failed to set the NPCap directory.");
+    ASSERT_MESSAGE_VOID(
         env, 
         LoadLibraryA("wpcap.dll") != 0,
         "\n"
@@ -49,8 +44,8 @@ static void SetAddrStringHelper(napi_env env, napi_value addressObj, const char*
 
     if (address) {
         napi_value temp;
-        assert_call_void(env, napi_create_string_utf8(env, address, strlen(address), &temp));
-        assert_call_void(env, napi_set_named_property(env, addressObj, key, temp));
+        ASSERT_CALL_VOID(env, napi_create_string_utf8(env, address, strlen(address), &temp));
+        ASSERT_CALL_VOID(env, napi_set_named_property(env, addressObj, key, temp));
     }
 }
 
@@ -59,7 +54,7 @@ static void SetAddrStringHelper(napi_env env, napi_value addressObj, const char*
 */
 napi_value libVersion(napi_env env, napi_callback_info info) {
     napi_value version;
-    assert_call(env, napi_create_string_utf8(env, pcap_lib_version(), NAPI_AUTO_LENGTH, &version));
+    ASSERT_CALL(env, napi_create_string_utf8(env, pcap_lib_version(), NAPI_AUTO_LENGTH, &version));
 
     return version;
 }
@@ -71,24 +66,24 @@ napi_value deviceList(napi_env env, napi_callback_info info) {
     char error[PCAP_ERRBUF_SIZE] = {0};
     pcap_if_t *alldevs, *cur_dev;
 
-    assert_message(env, pcap_findalldevs(&alldevs, error) != -1, error);
-    assert_message(env, alldevs != NULL, "Error: Unable to find any devices.");
+    ASSERT_MESSAGE(env, pcap_findalldevs(&alldevs, error) != -1, error);
+    ASSERT_MESSAGE(env, alldevs != NULL, "Error: Unable to find any devices.");
 
     napi_value list;
-    assert_call(env, napi_create_array(env, &list));
+    ASSERT_CALL(env, napi_create_array(env, &list));
         
     int i = 0, j = 0;
     pcap_addr_t *cur_addr;
     for (cur_dev = alldevs ; cur_dev != NULL ; cur_dev = cur_dev->next, i++) {
         napi_value device;
-        assert_call(env, napi_create_object(env, &device));
+        ASSERT_CALL(env, napi_create_object(env, &device));
 
         napi_value name, description, flags;
-        assert_call(env, napi_create_string_utf8(env, cur_dev->name, NAPI_AUTO_LENGTH, &name));
-        assert_call(env, napi_set_named_property(env, device, "name", name));
+        ASSERT_CALL(env, napi_create_string_utf8(env, cur_dev->name, NAPI_AUTO_LENGTH, &name));
+        ASSERT_CALL(env, napi_set_named_property(env, device, "name", name));
 
-        assert_call(env, napi_create_string_utf8(env, cur_dev->description, NAPI_AUTO_LENGTH, &description));
-        assert_call(env, napi_set_named_property(env, device, "description", description));
+        ASSERT_CALL(env, napi_create_string_utf8(env, cur_dev->description, NAPI_AUTO_LENGTH, &description));
+        ASSERT_CALL(env, napi_set_named_property(env, device, "description", description));
 
         {
             napi_value addresses;
@@ -100,26 +95,26 @@ napi_value deviceList(napi_env env, napi_callback_info info) {
                 int family = cur_addr->addr->sa_family;
                 if (family == AF_INET || family == AF_INET6) {
                     napi_value address;
-                    assert_call(env, napi_create_object(env, &address));
+                    ASSERT_CALL(env, napi_create_object(env, &address));
 
                     SetAddrStringHelper(env, address, "addr", cur_addr->addr);
                     SetAddrStringHelper(env, address, "netmask", cur_addr->netmask);
                     SetAddrStringHelper(env, address, "broadaddr", cur_addr->broadaddr);
                     SetAddrStringHelper(env, address, "dstaddr", cur_addr->dstaddr);
 
-                    assert_call(env, napi_set_element(env, addresses, j++, address));
+                    ASSERT_CALL(env, napi_set_element(env, addresses, j++, address));
                 }
             }
 
-            assert_call(env, napi_set_named_property(env, device, "addresses", addresses));
+            ASSERT_CALL(env, napi_set_named_property(env, device, "addresses", addresses));
         }
 
         if (cur_dev->flags & PCAP_IF_LOOPBACK) {
-            assert_call(env, napi_get_boolean(env, true, &flags));
-            assert_call(env, napi_set_named_property(env, device, "loopback", flags));
+            ASSERT_CALL(env, napi_get_boolean(env, true, &flags));
+            ASSERT_CALL(env, napi_set_named_property(env, device, "loopback", flags));
         }
 
-        assert_call(env, napi_set_element(env, list, i, device));
+        ASSERT_CALL(env, napi_set_element(env, list, i, device));
     }
 
     pcap_freealldevs(alldevs);
@@ -129,21 +124,21 @@ napi_value deviceList(napi_env env, napi_callback_info info) {
 napi_value findDevice(napi_env env, napi_callback_info info) {
     size_t argc = 1;
     napi_value args[1], device;
-    assert_call(env, napi_get_cb_info(env, info, &argc, args, nullptr, nullptr));
+    ASSERT_CALL(env, napi_get_cb_info(env, info, &argc, args, nullptr, nullptr));
 
-    assert_message(env, argc >= 1, "Invalid number of arguments. Must provide 1 argument." );
+    ASSERT_MESSAGE(env, argc >= 1, "Invalid number of arguments. Must provide 1 argument." );
 
     napi_valuetype type;
-    assert_call(env, napi_typeof(env, args[0], &type));
-    assert_message(env, napi_string == type, "The argument must be a string.");
+    ASSERT_CALL(env, napi_typeof(env, args[0], &type));
+    ASSERT_MESSAGE(env, napi_string == type, "The argument must be a string.");
     
     const char* ip = GetStringFromArg(env, args[0]);
 
     char error[PCAP_ERRBUF_SIZE] = {0}, name[INET6_ADDRSTRLEN] = {0};
     pcap_if_t *alldevs;
 
-    assert_message(env, pcap_findalldevs(&alldevs, error) != -1, error);
-    assert_message(env, alldevs != NULL, "Error: Unable to find any devices.");
+    ASSERT_MESSAGE(env, pcap_findalldevs(&alldevs, error) != -1, error);
+    ASSERT_MESSAGE(env, alldevs != NULL, "Error: Unable to find any devices.");
 
     bool found = false;
     pcap_if_t *cur_dev = nullptr;
@@ -161,7 +156,7 @@ napi_value findDevice(napi_env env, napi_callback_info info) {
             const char *ipAddress = GetIpAddress(cur_addr->addr);
             if (strcmp(ip, ipAddress) != 0) continue;
 
-            assert_call(env, napi_create_string_utf8(env, cur_dev->name, strlen(cur_dev->name), &device));
+            ASSERT_CALL(env, napi_create_string_utf8(env, cur_dev->name, strlen(cur_dev->name), &device));
             found = true;
             break;
         }

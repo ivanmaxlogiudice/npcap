@@ -4,75 +4,80 @@
 #include <node_api.h>
 
 // Empty value so that macros here are able to return NULL or void
-#define NODE_API_RETVAL_NOTHING // Intentionally blank #define
+#define RETVAL_NOTHING // Intentionally blank #define
 
-#define throw_last_error(env)                                                               \
-     do {                                                                                   \
-        const napi_extended_error_info* error_info;                                         \
-        napi_get_last_error_info((env), &error_info);                                       \
-        bool isPending;                                                                     \
-        const char* message = error_info->error_message;                                    \
-        napi_is_exception_pending((env), &isPending);                                       \
-        /* If an exception is already pending, don't rethrow it */                          \
-        if (!isPending) {                                                                   \
-            const char* errorMessage = message != NULL ? message : "empty error message";   \
-            napi_throw_error((env), NULL, errorMessage);                                    \
-        }                                                                                   \
-    } while (0)                                                   
+#define THROW_LAST_ERROR(env)                                               \
+    do {                                                                    \
+        const napi_extended_error_info* error;                              \
+        napi_get_last_error_info((env), &error);                            \
+        bool isPending;                                                     \
+        napi_is_exception_pending((env), &isPending);                       \
+        if (!isPending) {                                                   \
+            const char* errorMessage = error->error_message != nullptr      \
+                ? error->error_message                                      \
+                : "Empty error message";                                    \
+            napi_throw_error((env), nullptr, errorMessage);                 \
+        }                                                                   \
+    } while (0);
 
-#define assert_base(env, assertion, message, returnValue)           \
-    do {                                                            \
-        if (!(assertion)) {                                         \
-            napi_throw_error(env, NULL, message);                   \
-            return returnValue;                                     \
-        }                                                           \
-    } while(0)                                                      \
+#define ASSERT_CALL_BASE(env, assertion, returnValue)                       \
+    do {                                                                    \
+        if ((assertion) != napi_ok) {                                       \
+            THROW_LAST_ERROR(env);                                          \
+            return returnValue;                                             \
+        }                                                                   \
+    } while (0);
 
-// Returns NULL on failed assertion.
-#define assert(env, assertion)                                      \
-    assert_base(                                                    \
-        env,                                                        \
-        assertion,                                                  \
-        "assertion (" #assertion ") failed",                        \
-        NULL                                                        \
-    )
+#define ASSERT_BASE(env, assertion, message, returnValue)                   \
+    do {                                                                    \
+        if (!(assertion)) {                                                 \
+            napi_throw_error((env), nullptr, message);                      \
+            return returnValue;                                             \
+        }                                                                   \
+    } while(0); 
 
-// Returns empty on failed assertion.
-#define assert_void(env, assertion)                                 \
-    assert_base(                                                    \
-        env,                                                        \
-        assertion,                                                  \
-        "assertion (" #assertion ") failed",                        \
-        NODE_API_RETVAL_NOTHING                                     \
-    )
+#endif
 
-// Returns NULL on failed assertion.
-#define assert_message(env, assertion, message)                     \
-    assert_base(env, assertion, message, NULL)
+// Returns `NULL` on failed assertion.
+#define ASSERT(env, assertion)                                              \
+    ASSERT_BASE(                                                            \
+        env,                                                                \
+        assertion,                                                          \
+        "assertion (" #assertion ") failed.",                               \
+        nullptr                                                             \
+    );
 
-// Returns empty on failed assertion.
-#define assert_message_void(env, assertion, message)                \
-    assert_base(env, assertion, message, NODE_API_RETVAL_NOTHING)
+// Returns `NULL` on failed assertion with a custom message.
+#define ASSERT_MESSAGE(env, assertion, message)                             \
+    ASSERT_BASE(env, assertion, message, nullptr);
 
-#define assert_call_base(env, assertion, returnValue)               \
-    do {                                                            \
-        if ((assertion) != napi_ok) {                               \
-            throw_last_error((env));                                \
-            return returnValue;                                     \
-        }                                                           \
-    } while (0)
+// Returns `NULL` if the call doesn't return napi_ok
+#define ASSERT_CALL(env, call)                                              \
+    ASSERT_CALL_BASE(env, call, nullptr);
 
-#define assert_call(env, assertion)                                 \
-    assert_call_base(env, assertion, NULL)
+// Returns `empty` on failed assertion.
+#define ASSERT_VOID(env, assertion)                                         \
+    ASSERT_BASE(                                                            \
+        env,                                                                \
+        assertion,                                                          \
+        "assertion (" #assertion ") failed.",                               \
+        RETVAL_NOTHING                                                      \
+    );
 
-#define assert_call_void(env, assertion)                            \
-    assert_call_base(env, assertion, NODE_API_RETVAL_NOTHING)
+// Returns `empty` on failed assertion with a custom message.
+#define ASSERT_MESSAGE_VOID(env, assertion, message)                        \
+    ASSERT_BASE(env, assertion, message, RETVAL_NOTHING);
 
-#define declare_method(name, fn)                                    \
+// Returns `empty` if the call doesn't return napi_ok.
+#define ASSERT_CALL_VOID(env, assertion)                                    \
+    ASSERT_CALL_BASE(env, assertion, RETVAL_NOTHING);
+
+// Declare a method.
+#define DECLARE_METHOD(name, fn)                                            \
     { name, 0, fn, 0, 0, 0, napi_default, 0 }
 
 const char* GetStringFromArg(napi_env env, napi_value arg);
 const int32_t GetNumberFromArg(napi_env env, napi_value arg);
 const bool GetBooleanFromArg(napi_env env, napi_value arg);
+
 napi_value ReturnBoolean(napi_env env, bool value);
-#endif
