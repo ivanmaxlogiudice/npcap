@@ -5,8 +5,9 @@
 #include <dlfcn.h>
 #endif
 
-void loadNpcap(napi_env env) {
 #if defined(_WIN32)
+void loadNpcap(napi_env env) {
+
     char path[MAX_PATH] = {0};
    
     ASSERT_MESSAGE_VOID(env, GetSystemDirectoryA(path, MAX_PATH) != 0, "Failed to get the system directory.");
@@ -22,7 +23,9 @@ void loadNpcap(napi_env env) {
         "  Have you installed the Npcap library? See https://npcap.com/#download\n"
         "\n"
     );
+}
 #else
+void loadNpcap(napi_env env) {
     void* handle = dlopen("libpcap.so", RTLD_LAZY);
     if (handle) {
         dlclose(handle);
@@ -35,8 +38,21 @@ void loadNpcap(napi_env env) {
         "  Have you installed the library? sudo apt install libpcap-dev\n" // Need to install libpcap-dev??
         "\n"
     ))
-#endif
 }
+
+bool isValidDevice(pcap_if_t* device) {
+    if (device->addresses == NULL || (device->flags & PCAP_IF_LOOPBACK))
+        return false;
+
+    for (auto addr = device->addresses; addr != nullptr; addr = addr->next) {
+        if (addr->addr->sa_family == AF_INET) {
+            return true;
+        }
+    }
+
+    return false;
+}
+#endif
 
 const char* GetIpAddress(const struct sockaddr* addr) {
     char buffer[INET6_ADDRSTRLEN] = {0};
@@ -187,24 +203,54 @@ napi_value findDevice(napi_env env, napi_callback_info info) {
     return device;
 }
 
+napi_value defaultDevice(napi_env env, napi_callback_info info) {
+    // Get devices list
+    char error[PCAP_ERRBUF_SIZE] = {0};
+    pcap_if_t *devices;
+
+    ASSERT_MESSAGE(env, pcap_findalldevs(&devices, error) != -1, error);
+    ASSERT_MESSAGE(env, devices != NULL, "Error: Unable to find any devices.");
+
+    napi_value defaultDevice;
+
+#if defined(_WIN32)
+    // TODO: Implement windows version.
+#else
+    // Search the first device that is not a loopback and has addresses.
+    for (auto dev = devices; dev != NULL ; dev = dev->next) {
+        if (!isValidDevice(dev)) continue;
+
+        ASSERT_CALL(env, napi_create_string_utf8(env, dev->name, strlen(dev->name), &defaultDevice));
+        break;
+    }
+#endif
+
+    pcap_freealldevs(devices);
+    return defaultDevice;
+}
+
 napi_value Init(napi_env env, napi_value exports) {   
     loadNpcap(env);
 
     Session::Init(env, exports);
     
-    napi_value fnLibVersion, fnDeviceList, fnFindDevice;
+    napi_value fn;
 
     // libVersion
-    if (napi_ok != napi_create_function(env, "libVersion", NAPI_AUTO_LENGTH, libVersion, NULL, &fnLibVersion)) return NULL;
-    if (napi_ok != napi_set_named_property(env, exports, "libVersion", fnLibVersion)) return NULL;
+    if (napi_ok != napi_create_function(env, "libVersion", NAPI_AUTO_LENGTH, libVersion, NULL, &fn)) return NULL;
+    if (napi_ok != napi_set_named_property(env, exports, "libVersion", fn)) return NULL;
 
     // deviceList
-    if (napi_ok != napi_create_function(env, "deviceList", NAPI_AUTO_LENGTH, deviceList, NULL, &fnDeviceList)) return NULL;
-    if (napi_ok != napi_set_named_property(env, exports, "deviceList", fnDeviceList)) return NULL;
+    if (napi_ok != napi_create_function(env, "deviceList", NAPI_AUTO_LENGTH, deviceList, NULL, &fn)) return NULL;
+    if (napi_ok != napi_set_named_property(env, exports, "deviceList", fn)) return NULL;
 
     // findDevice
-    if (napi_ok != napi_create_function(env, "findDevice", NAPI_AUTO_LENGTH, findDevice, NULL, &fnFindDevice)) return NULL;
-    if (napi_ok != napi_set_named_property(env, exports, "findDevice", fnFindDevice)) return NULL;
+    if (napi_ok != napi_create_function(env, "findDevice", NAPI_AUTO_LENGTH, findDevice, NULL, &fn)) return NULL;
+    if (napi_ok != napi_set_named_property(env, exports, "findDevice", fn)) return NULL;
+
+    // findDevice
+    if (napi_ok != napi_create_function(env, "defaultDevice", NAPI_AUTO_LENGTH, defaultDevice, NULL, &fn)) return NULL;
+    if (napi_ok != napi_set_named_property(env, exports, "defaultDevice", fn)) return NULL;
 
     return exports;
 }
