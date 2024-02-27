@@ -98,7 +98,7 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
     size_t argc = 12;
     napi_value argv[12], thisArg;
     ASSERT_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisArg, nullptr));
-
+    
     // Verifiy arguments
     napi_valuetype type;
     
@@ -160,7 +160,8 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
         session->Close(env, info);
 
     // Get the header & buffer.
-    ASSERT_CALL(env, napi_get_buffer_info(env, argv[4], reinterpret_cast<void**>(&session->headerData), nullptr));
+    size_t headerLength = 0;
+    ASSERT_CALL(env, napi_get_buffer_info(env, argv[4], reinterpret_cast<void**>(&session->headerData), &headerLength));
     ASSERT_CALL(env, napi_get_buffer_info(env, argv[5], reinterpret_cast<void**>(&session->bufferData), &session->bufferLength));
 
     auto device = GetStringFromArg(env, argv[0]);
