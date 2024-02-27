@@ -6,6 +6,12 @@
 #endif
 
 #if defined(_WIN32)
+#include <vector>
+#include <iphlpapi.h>
+#pragma comment(lib, "iphlpapi.lib")
+#endif
+
+#if defined(_WIN32)
 void loadNpcap(napi_env env) {
 
     char path[MAX_PATH] = {0};
@@ -23,6 +29,21 @@ void loadNpcap(napi_env env) {
         "  Have you installed the Npcap library? See https://npcap.com/#download\n"
         "\n"
     );
+}
+
+bool isValidAdapter(PIP_ADAPTER_ADDRESSES adapter) {
+    if (adapter->OperStatus != IfOperStatusUp || adapter->FirstGatewayAddress == nullptr)
+        return false;
+
+    for (auto address = adapter->FirstUnicastAddress; address != nullptr; address = address->Next) {
+        if (!(address->Flags & IP_ADAPTER_ADDRESS_DNS_ELIGIBLE) || (address->Flags & IP_ADAPTER_ADDRESS_TRANSIENT))
+                continue;
+        
+        if (address->Address.lpSockaddr->sa_family == AF_INET)
+            return true;
+    }
+
+    return false;
 }
 #else
 void loadNpcap(napi_env env) {
@@ -214,7 +235,36 @@ napi_value defaultDevice(napi_env env, napi_callback_info info) {
     napi_value defaultDevice = nullptr;
 
 #if defined(_WIN32)
-    // TODO: Implement windows version.
+    // Get the list of adapters
+    ULONG bufferLength = 0;
+    GetAdaptersAddresses(AF_INET, GAA_FLAG_INCLUDE_GATEWAYS | GAA_FLAG_INCLUDE_PREFIX, nullptr, nullptr, &bufferLength);
+
+    std::vector<uint8_t> buffer(bufferLength);
+    ASSERT_MESSAGE(env, 
+        GetAdaptersAddresses(AF_INET, GAA_FLAG_INCLUDE_GATEWAYS | GAA_FLAG_INCLUDE_PREFIX, 0, reinterpret_cast<IP_ADAPTER_ADDRESSES *>(&buffer[0]), &bufferLength) == ERROR_SUCCESS, 
+        "Failed to get network interfaces with GetAdaptersAddresses"
+    );
+
+    bool found = false;
+    auto addresses = reinterpret_cast<IP_ADAPTER_ADDRESSES*>(&buffer[0]);
+    for (auto address = addresses; address != nullptr; address = address->Next) {
+        if (!isValidAdapter(address)) continue;
+
+        // Find the device that match with the adapter.
+        for (auto dev = devices; dev != nullptr; dev = dev->next) {
+            if (dev->addresses == NULL || (dev->flags & PCAP_IF_LOOPBACK))
+                continue;
+
+            char* adapterName = static_cast<char*>(address->AdapterName);
+            if (strstr(dev->name, adapterName) != nullptr) {
+                ASSERT_CALL(env, napi_create_string_utf8(env, dev->name, NAPI_AUTO_LENGTH, &defaultDevice));
+                found = true;
+                break;
+            }
+        }
+
+        if (found) break;
+    }
 #else
     // Search the first device that is not a loopback and has addresses.
     for (auto dev = devices; dev != NULL ; dev = dev->next) {
