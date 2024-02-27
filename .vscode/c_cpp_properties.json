@@ -19,6 +19,9 @@
         },
         {
             "name": "Linux",
+            "includePath": [
+                "~/.nvm/versions/node/v21.5.0/include/node"
+            ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
