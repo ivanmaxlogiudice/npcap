@@ -190,7 +190,7 @@ napi_value findDevice(napi_env env, napi_callback_info info) {
 napi_value Init(napi_env env, napi_value exports) {   
     loadNpcap(env);
 
-    // Session::Init(env, exports);
+    Session::Init(env, exports);
     
     napi_value fnLibVersion, fnDeviceList, fnFindDevice;
 

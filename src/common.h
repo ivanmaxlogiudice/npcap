@@ -8,7 +8,7 @@
 // Empty value so that macros here are able to return NULL or void
 #define RETVAL_NOTHING // Intentionally blank #define
 
-#define THROW_LAST_ERROR(env)                                               \
+#define THROW_LAST_ERROR(env, assertion)                                    \
     do {                                                                    \
         const napi_extended_error_info* error;                              \
         napi_get_last_error_info((env), &error);                            \
@@ -17,7 +17,7 @@
         if (!isPending) {                                                   \
             const char* errorMessage = error->error_message != nullptr      \
                 ? error->error_message                                      \
-                : "Empty error message";                                    \
+                : "assertion (" #assertion ") failed";                      \
             napi_throw_error((env), nullptr, errorMessage);                 \
         }                                                                   \
     } while (0);
@@ -25,7 +25,7 @@
 #define ASSERT_CALL_BASE(env, assertion, returnValue)                       \
     do {                                                                    \
         if ((assertion) != napi_ok) {                                       \
-            THROW_LAST_ERROR(env);                                          \
+            THROW_LAST_ERROR(env, assertion != napi_ok);                    \
             return returnValue;                                             \
         }                                                                   \
     } while (0);

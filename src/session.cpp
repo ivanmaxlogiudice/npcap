@@ -24,7 +24,7 @@ napi_value Session::Init(napi_env env, napi_value exports) {
      * our addon unable to support Node.js worker threads and multiple contexts on a
      * single thread.
     */
-    napi_ref* constructor;
+    napi_ref* constructor = new napi_ref;
     ASSERT_CALL(env, napi_create_reference(env, cons, 1, constructor));
     ASSERT_CALL(env, napi_set_instance_data(env, constructor, [](napi_env env, void* data, void* hint) {
         napi_ref* constructor = static_cast<napi_ref*>(data);
