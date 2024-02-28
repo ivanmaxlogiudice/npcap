@@ -40,5 +40,14 @@
         "yaml"
     ],
 
-    "C_Cpp.default.cppStandard": "c++23"
+    "C_Cpp.default.cppStandard": "c++23",
+    "files.associations": {
+        "*.md": "markdown",
+        "system_error": "cpp",
+        "xlocale": "cpp",
+        "xstring": "cpp",
+        "xutility": "cpp",
+        "string": "cpp",
+        "vector": "cpp"
+    }
 }

@@ -19,7 +19,7 @@ export class NpcapSession extends TypedEventEmitter<{
 
     session: Session
 
-    constructor(live: boolean, device: string, options: LiveSessionOptions) {
+    constructor(live: boolean, device?: string, options: LiveSessionOptions = {}) {
         super()
 
         const {
@@ -33,7 +33,7 @@ export class NpcapSession extends TypedEventEmitter<{
             promiscuous = true,
         } = options
 
-        this.device = device
+        this.device = device || npcap.defaultDevice() || ''
         this.buffer = Buffer.alloc(snapLen)
         this.header = Buffer.alloc(16)
 
@@ -43,7 +43,7 @@ export class NpcapSession extends TypedEventEmitter<{
 
         if (live) {
             this.linkType = this.session.openLive(
-                device,
+                this.device,
                 onPacket,
                 filter,
                 bufferSize,
@@ -59,7 +59,7 @@ export class NpcapSession extends TypedEventEmitter<{
         }
         else {
             this.linkType = this.session.openOffline(
-                device,
+                this.device,
                 onPacket,
                 filter,
                 bufferSize,

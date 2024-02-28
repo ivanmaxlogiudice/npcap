@@ -152,6 +152,15 @@ export interface Npcap {
      */
     findDevice: (ip: string) => string | undefined
 
+    /**
+     * Retrieves the default device.
+     *
+     * @returns The name of the default device.
+     *
+     * @throws {Error} If there is an error retrieving the default device.
+     */
+    defaultDevice: () => string | undefined
+
     Session: SessionClass
 }
 
