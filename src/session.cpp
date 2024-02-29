@@ -84,9 +84,11 @@ napi_value Session::New(napi_env env, napi_callback_info info) {
 napi_value Session::Constructor(napi_env env) {
     void* data = nullptr;
     ASSERT_CALL(env, napi_get_instance_data(env, &data));
+    
+    napi_ref* constructor = static_cast<napi_ref*>(data);
 
     napi_value cons;
-    ASSERT_CALL(env, napi_get_reference_value(env, reinterpret_cast<napi_ref>(data), &cons));
+    ASSERT_CALL(env, napi_get_reference_value(env, *constructor, &cons));
     return cons;
 }
 
