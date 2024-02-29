@@ -120,7 +120,8 @@ export interface Session {
 }
 
 export interface SessionClass {
-    new(): Session
+    (): Session // Invoke as plain function
+    new(): Session // Invoke as constructor
 }
 
 export interface Npcap {
@@ -161,6 +162,10 @@ export interface Npcap {
      */
     defaultDevice: () => string | undefined
 
+    /**
+     * This expose the addon Session class, its recommended
+     * to use `createSession` and `createOfflineSession` instead.
+     */
     Session: SessionClass
 }
 
