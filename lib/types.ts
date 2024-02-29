@@ -6,11 +6,11 @@ import type { Buffer } from 'node:buffer'
  * @see {@link https://www.tcpdump.org/linktypes.html | LinkType Headers}
  */
 export type LinkType =
-    | 'LINKTYPE_NULL'
     | 'LINKTYPE_ETHERNET'
-    | 'LINKTYPE_IEEE802_11_RADIO'
+    | 'LINKTYPE_NULL'
     | 'LINKTYPE_RAW'
     | 'LINKTYPE_LINUX_SLL'
+    // | 'LINKTYPE_IEEE802_11_RADIO'
 
 export interface CaptureStats {
     /**
@@ -44,10 +44,10 @@ export interface Device {
     loopback?: boolean
 }
 
-export interface PacketData {
+export interface PacketData<T = LinkType> {
+    linkType: T
     buffer: Buffer
     header: Buffer
-    linkType: LinkType
 }
 
 export interface CommonSessionOptions {

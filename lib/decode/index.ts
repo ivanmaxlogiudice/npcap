@@ -18,46 +18,51 @@ export class NpcapHeader {
     }
 }
 
-export class NpcapPacket {
-    linkType?: LinkType
-    npcapHeader?: NpcapHeader
-    payload?: EthernetPacket | NullPacket | IPv4 | SLLPacket
-
-    constructor(
-        public emitter?: EventEmitter,
-    ) { }
-
-    decode(packet: PacketData) {
-        this.linkType = packet.linkType
-        this.npcapHeader = new NpcapHeader(packet.header)
-
-        const buffer = packet.buffer.subarray(0, this.npcapHeader.caplen)
-
-        switch (this.linkType) {
-            case 'LINKTYPE_ETHERNET':
-                this.payload = new EthernetPacket(this.emitter).decode(buffer)
-                break
-            case 'LINKTYPE_NULL':
-                this.payload = new NullPacket(this.emitter).decode(buffer)
-                break
-            case 'LINKTYPE_RAW':
-                this.payload = new IPv4(this.emitter).decode(buffer)
-                break
-            case 'LINKTYPE_LINUX_SLL':
-                this.payload = new SLLPacket(this.emitter).decode(buffer)
-                break
-            default:
-                console.log(`[NpcapPacket] Unknown decode link type '${this.linkType}'.`)
-        }
-
-        return this
-    }
-
-    toString() {
-        return `${this.linkType} ${this.payload}`
-    }
+export interface PacketByType {
+    LINKTYPE_ETHERNET: EthernetPacket
+    LINKTYPE_NULL: NullPacket
+    LINKTYPE_RAW: IPv4
+    LINKTYPE_LINUX_SLL: SLLPacket
 }
 
-export function decode(packet: PacketData, emitter?: EventEmitter) {
-    return new NpcapPacket(emitter).decode(packet)
+export type NcapPacket = {
+    [T in LinkType]: {
+        linkType: T
+        npcapHeader: NpcapHeader
+        payload: PacketByType[T]
+    }
+}[LinkType]
+
+export function decode<T extends LinkType>(packet: PacketData & { linkType: T }, emitter?: EventEmitter): NcapPacket & { linkType: T } {
+    const npcapHeader = new NpcapHeader(packet.header)
+    const buffer = packet.buffer.subarray(0, npcapHeader.caplen)
+
+    switch (packet.linkType) {
+        case 'LINKTYPE_ETHERNET':
+            return {
+                npcapHeader,
+                linkType: packet.linkType,
+                payload: new EthernetPacket(emitter).decode(buffer),
+            }
+        case 'LINKTYPE_NULL':
+            return {
+                npcapHeader,
+                linkType: packet.linkType,
+                payload: new NullPacket(emitter).decode(buffer),
+            }
+        case 'LINKTYPE_RAW':
+            return {
+                npcapHeader,
+                linkType: packet.linkType,
+                payload: new IPv4(emitter).decode(buffer),
+            }
+        case 'LINKTYPE_LINUX_SLL':
+            return {
+                npcapHeader,
+                linkType: packet.linkType,
+                payload: new SLLPacket(emitter).decode(buffer),
+            }
+        default:
+            throw new Error(`[NpcapPacket] Unknown decode link type '${packet.linkType}'.`)
+    }
 }

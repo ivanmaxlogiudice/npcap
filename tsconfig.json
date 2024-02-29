@@ -29,6 +29,6 @@
         /* Completeness */
         "skipLibCheck": true
     },
-    "include": ["lib", "tests", "tests/decode/packets/sll.test.ts"],
+    "include": ["lib", "tests"],
     "exclude": ["node_modules"]
 }

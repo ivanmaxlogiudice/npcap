@@ -163,8 +163,9 @@ export interface Npcap {
     defaultDevice: () => string | undefined
 
     /**
-     * This expose the addon Session class, its recommended
-     * to use `createSession` and `createOfflineSession` instead.
+     * This expose the addon Session class.
+     *
+     * Use `createSession` and `createOfflineSession` instead.
      */
     Session: SessionClass
 }
