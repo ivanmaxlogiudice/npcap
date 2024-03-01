@@ -1,4 +1,4 @@
-import { ETHERNET_TYPE_ARP, ETHERNET_TYPE_IPV4, ETHERNET_TYPE_IPV6, EthernetTypeString } from '@/types'
+import { PROTOCOL_ARP, PROTOCOL_IPV4, PROTOCOL_IPV6, ProtocolName } from '@/types'
 import { Arp, IPv4, IPv6 } from '../protocols'
 import { int8_to_hex } from '../utils'
 import type { Buffer } from 'node:buffer'
@@ -32,11 +32,46 @@ export class SLLAddr {
 export class SLLPacket {
     static decoderName = 'sll-packet'
 
-    packetType!: number
-    addressType!: number
-    addressLen!: number
-    address!: SLLAddr
-    ethertype!: number
+    /**
+     * Packet type field.
+     *
+     * @see {@link https://www.tcpdump.org/linktypes/LINKTYPE_LINUX_SLL.html | Linux SLL}
+     */
+    packetType?: number
+
+    /**
+     * Address type.
+     *
+     * @see {@link https://www.tcpdump.org/linktypes/LINKTYPE_LINUX_SLL.html | Linux SLL}
+     */
+    addressType?: number
+
+    /**
+     * Address length
+     *
+     * @see {@link https://www.tcpdump.org/linktypes/LINKTYPE_LINUX_SLL.html | Linux SLL}
+     */
+    addressLen?: number
+
+    /**
+     * Source address.
+     *
+     * @see {@link https://www.tcpdump.org/linktypes/LINKTYPE_LINUX_SLL.html | Linux SLL}
+     */
+    address?: SLLAddr
+
+    /**
+     * Determine which protocol is encapsulated in the payload.
+     *
+     * @see {@link http://en.wikipedia.org/wiki/EtherType | EtherType}
+     */
+    type?: number
+
+    /**
+     * The payload of the packet frame.
+     *
+     * Supported protocols: IPv4, Arp, IPv6.
+     */
     payload?: IPv4 | Arp | IPv6
 
     constructor(
@@ -57,55 +92,61 @@ export class SLLPacket {
         this.address = new SLLAddr().decode(rawPacket, offset, this.addressLen)
         offset += 8 // address uses 8 bytes in frame, but only address_len bytes are significant
 
-        this.ethertype = rawPacket.readUInt16BE(offset)
+        this.type = rawPacket.readUInt16BE(offset)
         offset += 2
 
-        if (this.ethertype < 1536) {
+        if (this.type < 1536) {
             // this packet is actually some 802.3 type without an ethertype
-            this.ethertype = 0
+            this.type = 0
         }
         else {
             // http://en.wikipedia.org/wiki/EtherType
-            switch (this.ethertype) {
-                case ETHERNET_TYPE_IPV4:
+            switch (this.type) {
+                case PROTOCOL_IPV4:
                     this.payload = new IPv4(this.emitter).decode(rawPacket, offset)
                     break
-                case ETHERNET_TYPE_ARP:
+                case PROTOCOL_ARP:
                     this.payload = new Arp(this.emitter).decode(rawPacket, offset)
                     break
-                case ETHERNET_TYPE_IPV6:
+                case PROTOCOL_IPV6:
                     this.payload = new IPv6(this.emitter).decode(rawPacket, offset)
                     break
                 default:
                     this.payload = undefined
-                    console.log(`NpcapPacket: SLLPacket() - Dont know how to decode ethertype ${this.ethertype}.`)
+                    console.log(`NpcapPacket: SLLPacket() - Dont know how to decode ethertype ${this.type}.`)
             }
         }
+
+        if (this.emitter)
+            this.emitter.emit(SLLPacket.decoderName, this)
 
         return this
     }
 
     isIPv4(): this is SLLPacket & { payload: IPv4 } {
-        return this.ethertype === ETHERNET_TYPE_IPV4
+        return this.type === PROTOCOL_IPV4
     }
 
     isArp(): this is SLLPacket & { payload: Arp } {
-        return this.ethertype === ETHERNET_TYPE_ARP
+        return this.type === PROTOCOL_ARP
     }
 
     isIPv6(): this is SLLPacket & { payload: IPv6 } {
-        return this.ethertype === ETHERNET_TYPE_IPV6
+        return this.type === PROTOCOL_IPV6
     }
 
     toString() {
-        let ret = ['recv_us', 'broadcast', 'multicast', 'remote_remote', 'sent_us'][this.packetType] ?? ''
+        let ret = ''
+
+        if (this.packetType)
+            ret = ['recv_us', 'broadcast', 'multicast', 'remote_remote', 'sent_us'][this.packetType] ?? ''
 
         ret += ` addrtype ${this.addressType} ${this.address}`
 
-        if (this.ethertype in EthernetTypeString)
-            ret += ` ${EthernetTypeString[this.ethertype]}`
+        if (this.type && this.type in ProtocolName)
+            ret += ` ${ProtocolName[this.type]}`
         else
-            ret += ` ethertype ${this.ethertype}`
+            ret += ` ethertype ${this.type}`
 
         return `${ret} ${this.payload}`
     }

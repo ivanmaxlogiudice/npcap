@@ -1,5 +1,5 @@
 import { int8_to_hex as hex } from '@/decode/utils'
-import { ETHERNET_TYPE_ARP, ETHERNET_TYPE_IPV4, ETHERNET_TYPE_IPV6, ETHERNET_TYPE_VLAN, EthernetTypeString } from '@/types'
+import { PROTOCOL_ARP, PROTOCOL_IPV4, PROTOCOL_IPV6, PROTOCOL_VLAN, ProtocolName } from '@/types'
 import { Arp, IPv4, IPv6, Vlan } from '../protocols'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
@@ -24,16 +24,44 @@ export class EthernetAddr {
 }
 
 export class EthernetPacket {
+    static decoderName = 'ethernet-packet'
+
+    /**
+     * Destination Address
+     */
     dhost?: EthernetAddr
+
+    /**
+     * Source Address
+     */
     shost?: EthernetAddr
-    ethertype: number = 0
+
+    /**
+     * Determine which protocol is encapsulated in the payload.
+     *
+     * @see {@link http://en.wikipedia.org/wiki/EtherType | EtherType}
+     */
+    type?: number
+
+    /**
+     * VLAN-tagged (802.1Q)
+     *
+     * @see {@link https://en.wikipedia.org/wiki/IEEE_802.1Q | IEEE 802.1Q}
+     */
     vlan?: Vlan
+
+    /**
+     * The payload of the packet frame.
+     *
+     * Supported protocols: IPv4, Arp, IPv6.
+     */
     payload?: IPv4 | Arp | IPv6
 
     constructor(
         public emitter?: EventEmitter,
     ) { }
 
+    // https://en.wikipedia.org/wiki/Ethernet_frame
     decode(rawPacket: Buffer, offset: number = 0) {
         this.dhost = new EthernetAddr(rawPacket, offset)
         offset += 6
@@ -41,53 +69,55 @@ export class EthernetPacket {
         this.shost = new EthernetAddr(rawPacket, offset)
         offset += 6
 
-        this.ethertype = rawPacket.readUInt16BE(offset)
+        this.type = rawPacket.readUInt16BE(offset)
         offset += 2
 
         // VLAN-tagged (802.1Q)
-        if (this.ethertype === ETHERNET_TYPE_VLAN) {
+        if (this.type === PROTOCOL_VLAN) {
             this.vlan = new Vlan(this.emitter).decode(rawPacket, offset)
             offset += 2
 
-            this.ethertype = rawPacket.readUInt16BE(offset)
+            this.type = rawPacket.readUInt16BE(offset)
             offset += 2
         }
 
-        if (this.ethertype < 1536) {
+        if (this.type < 1536) {
             // this packet is actually some 802.3 type without an ethertype
-            this.ethertype = 0
+            this.type = 0
         }
         else {
-            // http://en.wikipedia.org/wiki/EtherType
-            switch (this.ethertype) {
-                case ETHERNET_TYPE_IPV4:
+            switch (this.type) {
+                case PROTOCOL_IPV4:
                     this.payload = new IPv4(this.emitter).decode(rawPacket, offset)
                     break
-                case ETHERNET_TYPE_ARP:
+                case PROTOCOL_ARP:
                     this.payload = new Arp(this.emitter).decode(rawPacket, offset)
                     break
-                case ETHERNET_TYPE_IPV6:
+                case PROTOCOL_IPV6:
                     this.payload = new IPv6(this.emitter).decode(rawPacket, offset)
                     break
                 default:
                     this.payload = undefined
-                    console.log(`NpcapPacket: EthernetPacket() - Dont know how to decode ethertype ${this.ethertype}.`)
+                    console.log(`NpcapPacket: EthernetPacket() - Dont know how to decode ethertype ${this.type}.`)
             }
         }
+
+        if (this.emitter)
+            this.emitter.emit(EthernetPacket.decoderName, this)
 
         return this
     }
 
     isIPv4(): this is EthernetPacket & { payload: IPv4 } {
-        return this.ethertype === ETHERNET_TYPE_IPV4
+        return this.type === PROTOCOL_IPV4
     }
 
     isArp(): this is EthernetPacket & { payload: Arp } {
-        return this.ethertype === ETHERNET_TYPE_ARP
+        return this.type === PROTOCOL_ARP
     }
 
     isIPv6(): this is EthernetPacket & { payload: IPv6 } {
-        return this.ethertype === ETHERNET_TYPE_IPV6
+        return this.type === PROTOCOL_IPV6
     }
 
     toString() {
@@ -96,10 +126,10 @@ export class EthernetPacket {
         if (this.vlan)
             ret += ` vlan ${this.vlan}`
 
-        if (this.ethertype in EthernetTypeString)
-            ret += ` ${EthernetTypeString[this.ethertype]}`
+        if (this.type && this.type in ProtocolName)
+            ret += ` ${ProtocolName[this.type]}`
         else
-            ret += ` ethertype ${this.ethertype}`
+            ret += ` ethertype ${this.type}`
 
         return `${ret} ${this.payload}`
     }

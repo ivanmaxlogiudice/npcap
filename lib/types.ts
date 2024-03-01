@@ -154,13 +154,13 @@ export interface OfflineSessionOptions extends CommonSessionOptions {
 
 }
 
-export const ETHERNET_TYPE_IPV4 = 0x800
-export const ETHERNET_TYPE_ARP = 0x806
-export const ETHERNET_TYPE_VLAN = 0x8100
-export const ETHERNET_TYPE_IPV6 = 0x86dd
+export const PROTOCOL_IPV4 = 0x800
+export const PROTOCOL_ARP = 0x806
+export const PROTOCOL_VLAN = 0x8100
+export const PROTOCOL_IPV6 = 0x86dd
 
-export const EthernetTypeString: Record<number, string> = {
-    [ETHERNET_TYPE_IPV4]: 'IPv4',
-    [ETHERNET_TYPE_ARP]: 'Arp',
-    [ETHERNET_TYPE_IPV6]: 'IPv6',
+export const ProtocolName: Record<number, string> = {
+    [PROTOCOL_IPV4]: 'IPv4',
+    [PROTOCOL_ARP]: 'Arp',
+    [PROTOCOL_IPV6]: 'IPv6',
 }

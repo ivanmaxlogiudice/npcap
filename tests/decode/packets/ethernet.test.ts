@@ -3,7 +3,7 @@ import { Buffer } from 'node:buffer'
 import EventEmitter from 'node:events'
 import { EthernetAddr, EthernetPacket } from '@/decode/packets'
 import { IPv4 } from '@/decode/protocols'
-import { ETHERNET_TYPE_IPV4 } from '@/types'
+import { PROTOCOL_IPV4 } from '@/types'
 
 describe('EthernetAddr', () => {
     let instance: EthernetAddr
@@ -63,7 +63,7 @@ describe('EthernetPacket', () => {
 
             expect(instance).toHaveProperty('dhost.addr', [232, 173, 166, 11, 63, 212])
             expect(instance).toHaveProperty('shost.addr', [76, 52, 136, 180, 178, 172])
-            expect(instance).toHaveProperty('ethertype', ETHERNET_TYPE_IPV4)
+            expect(instance).toHaveProperty('type', PROTOCOL_IPV4)
             expect(instance).toHaveProperty('vlan', undefined)
 
             expect(instance.payload).toBeInstanceOf(IPv4)
@@ -74,7 +74,7 @@ describe('EthernetPacket', () => {
 
             expect(instance).toHaveProperty('dhost.addr', [170, 187, 204, 221, 238, 255])
             expect(instance).toHaveProperty('shost.addr', [17, 34, 51, 68, 85, 102])
-            expect(instance).toHaveProperty('ethertype', ETHERNET_TYPE_IPV4)
+            expect(instance).toHaveProperty('type', PROTOCOL_IPV4)
             expect(instance.vlan?.toString()).toBe('0 0 1')
 
             expect(instance.payload).toBeInstanceOf(IPv4)

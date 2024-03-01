@@ -25,7 +25,7 @@ describe('NullPacket', () => {
                 , 'hex',
             ))
 
-            expect(instance).toHaveProperty('pftype', 2)
+            expect(instance).toHaveProperty('type', 2)
             expect(instance.payload).toBeInstanceOf(IPv4)
         })
 
@@ -42,7 +42,7 @@ describe('NullPacket', () => {
                 , 'hex',
             ))
 
-            expect(instance).toHaveProperty('pftype', 30)
+            expect(instance).toHaveProperty('type', 30)
             expect(instance.payload).toBeInstanceOf(IPv6)
         })
     })

@@ -5,7 +5,18 @@ import type EventEmitter from 'node:events'
 export class NullPacket {
     static decoderName = 'null-packet'
 
-    pftype!: number
+    /**
+     * Determine which protocol is encapsulated in the payload.
+     *
+     * @see {@link https://www.tcpdump.org/linktypes/LINKTYPE_NULL.html | LINKTYPE_NULL}
+     */
+    type?: number
+
+    /**
+     * The payload of the packet frame.
+     *
+     * Supported protocols: IPv4, IPv6.
+     */
     payload?: IPv4 | IPv6
 
     constructor(
@@ -15,11 +26,11 @@ export class NullPacket {
     // https://www.tcpdump.org/linktypes/LINKTYPE_NULL.html
     decode(rawPacket: Buffer, offset: number = 0) {
         if (rawPacket[offset] === 0 && rawPacket[offset + 1] === 0)
-            this.pftype = rawPacket[offset + 3]
+            this.type = rawPacket[offset + 3]
         else
-            this.pftype = rawPacket[offset]
+            this.type = rawPacket[offset]
 
-        switch (this.pftype) {
+        switch (this.type) {
             case 2:
                 this.payload = new IPv4(this.emitter).decode(rawPacket, offset + 4)
                 break
@@ -30,7 +41,7 @@ export class NullPacket {
                 break
             default:
                 this.payload = undefined
-                console.log(`NpcapPacket: NullPacket() - Dont know how to decode protocol family ${this.pftype}.`)
+                console.log(`NpcapPacket: NullPacket() - Dont know how to decode protocol family ${this.type}.`)
         }
 
         if (this.emitter)
@@ -40,14 +51,14 @@ export class NullPacket {
     }
 
     isIPv4(): this is NullPacket & { payload: IPv4 } {
-        return this.pftype === 2
+        return this.type === 2
     }
 
     isIPv6(): this is NullPacket & { payload: IPv6 } {
-        return [24, 28, 30].includes(this.pftype)
+        return this.type !== undefined && [24, 28, 30].includes(this.type)
     }
 
     toString() {
-        return `${this.pftype} ${this.payload}`
+        return `${this.type} ${this.payload}`
     }
 }
