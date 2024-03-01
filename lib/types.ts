@@ -30,17 +30,53 @@ export interface CaptureStats {
     ps_drop: number
 }
 
+/**
+ * Network Address
+ */
 export interface Address {
+    /**
+     * The network address.
+     */
     addr: string
+
+    /**
+     * The netmask of the network address.
+     */
     netmask: string
+
+    /**
+     * The broadcast address of the network.
+     */
     broadaddr?: string
+
+    /**
+     * The destination address.
+     */
     dstaddr?: string
 }
 
+/**
+ * Network device.
+ */
 export interface Device {
+    /**
+     * The name of the device.
+     */
     name: string
+
+    /**
+     * A description of the device.
+     */
     description?: string
+
+    /**
+     * An array of network addresses associated with the device.
+     */
     addresses: Address[]
+
+    /**
+     * Indicates if the device is a loopback device.
+     */
     loopback?: boolean
 }
 
