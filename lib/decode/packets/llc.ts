@@ -68,6 +68,18 @@ export class LLCPacket {
         return this
     }
 
+    isIPv4(): this is LLCPacket & { payload: IPv4 } {
+        return this.type === ETHERNET_TYPE_IPV4
+    }
+
+    isArp(): this is LLCPacket & { payload: Arp } {
+        return this.type === ETHERNET_TYPE_ARP
+    }
+
+    isIPv6(): this is LLCPacket & { payload: IPv6 } {
+        return this.type === ETHERNET_TYPE_IPV6
+    }
+
     toString() {
         let ret = `dsap: ${this.dsap} ssap: ${this.ssap}`
 

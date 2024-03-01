@@ -85,6 +85,18 @@ export class SLLPacket {
         return this
     }
 
+    isIPv4(): this is SLLPacket & { payload: IPv4 } {
+        return this.ethertype === ETHERNET_TYPE_IPV4
+    }
+
+    isArp(): this is SLLPacket & { payload: Arp } {
+        return this.ethertype === ETHERNET_TYPE_ARP
+    }
+
+    isIPv6(): this is SLLPacket & { payload: IPv6 } {
+        return this.ethertype === ETHERNET_TYPE_IPV6
+    }
+
     toString() {
         let ret = ['recv_us', 'broadcast', 'multicast', 'remote_remote', 'sent_us'][this.packetType] ?? ''
 

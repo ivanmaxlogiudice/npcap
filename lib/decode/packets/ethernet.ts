@@ -34,7 +34,7 @@ export class EthernetPacket {
         public emitter?: EventEmitter,
     ) { }
 
-    decode(rawPacket: Buffer, offset: number = 0): EthernetPacket {
+    decode(rawPacket: Buffer, offset: number = 0) {
         this.dhost = new EthernetAddr(rawPacket, offset)
         offset += 6
 
@@ -76,6 +76,18 @@ export class EthernetPacket {
         }
 
         return this
+    }
+
+    isIPv4(): this is EthernetPacket & { payload: IPv4 } {
+        return this.ethertype === ETHERNET_TYPE_IPV4
+    }
+
+    isArp(): this is EthernetPacket & { payload: Arp } {
+        return this.ethertype === ETHERNET_TYPE_ARP
+    }
+
+    isIPv6(): this is EthernetPacket & { payload: IPv6 } {
+        return this.ethertype === ETHERNET_TYPE_IPV6
     }
 
     toString() {

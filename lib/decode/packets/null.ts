@@ -39,6 +39,14 @@ export class NullPacket {
         return this
     }
 
+    isIPv4(): this is NullPacket & { payload: IPv4 } {
+        return this.pftype === 2
+    }
+
+    isIPv6(): this is NullPacket & { payload: IPv6 } {
+        return [24, 28, 30].includes(this.pftype)
+    }
+
     toString() {
         return `${this.pftype} ${this.payload}`
     }

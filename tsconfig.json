@@ -29,6 +29,6 @@
         /* Completeness */
         "skipLibCheck": true
     },
-    "include": ["lib", "tests"],
+    "include": ["lib", "tests", "examples"],
     "exclude": ["node_modules"]
 }

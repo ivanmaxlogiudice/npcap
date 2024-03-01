@@ -80,8 +80,8 @@ export interface Device {
     loopback?: boolean
 }
 
-export interface PacketData<T = LinkType> {
-    linkType: T
+export interface PacketData {
+    linkType: LinkType
     buffer: Buffer
     header: Buffer
 }
