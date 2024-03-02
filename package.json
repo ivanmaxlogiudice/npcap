@@ -24,7 +24,9 @@
         "configure": "node-gyp configure",
         "install": "node-gyp rebuild",
         "build": "node-gyp build",
-        "dev": "esno lib/index.ts"
+        "dev": "esno lib/index.ts",
+        "lint": "eslint --cache .",
+        "typecheck": "tsc --noEmit"
     },
     "devDependencies": {
         "@ivanmaxlogiudice/eslint-config": "^1.0.24",

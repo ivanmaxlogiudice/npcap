@@ -11,7 +11,7 @@ export class SLLAddr {
         this.addr = Array.from({ length: len })
 
         for (let i = 0; i < len; i++)
-    	    this.addr[i] = rawPacket[offset + i]
+            this.addr[i] = rawPacket[offset + i]
 
         return this
     }
