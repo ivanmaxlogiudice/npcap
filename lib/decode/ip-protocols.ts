@@ -2,6 +2,16 @@ import { HeaderExtension, ICMP, IGMP, IPv4, IPv6, NoNext, Tcp, Udp } from './pro
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
 
+export type ProtocolsType =
+    | HeaderExtension
+    | ICMP
+    | IGMP
+    | IPv4
+    | Tcp
+    | Udp
+    | IPv6
+    | NoNext
+
 // https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 export function protocols(protocol: number, emitter: EventEmitter | undefined, rawPacket: Buffer, offset: number, len: number = 0) {
     switch (protocol) {

@@ -1,3 +1,4 @@
+import type { ProtocolsType } from '../ip-protocols'
 import { protocols } from '../ip-protocols'
 import type { Buffer } from 'node:buffer'
 
@@ -19,7 +20,7 @@ export class NoNext {
 }
 
 export class HeaderExtension {
-    payload?: any
+    payload?: ProtocolsType
     nextHeader?: number
     headerLength?: number
     protocolName?: string

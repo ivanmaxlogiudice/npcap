@@ -1,3 +1,4 @@
+import type { ProtocolsType } from '../ip-protocols'
 import { protocols } from '../ip-protocols'
 import { int8_to_dec } from '../utils'
 import type { Buffer } from 'node:buffer'
@@ -78,7 +79,7 @@ export class IPv4 {
     saddr?: IPv4Addr
     daddr?: IPv4Addr
     protocolName?: string
-    payload?: any
+    payload?: ProtocolsType
 
     constructor(
         public emitter?: EventEmitter,
