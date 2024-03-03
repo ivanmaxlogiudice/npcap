@@ -24,12 +24,11 @@ export class IPFlags {
 
     toString() {
         let ret: string = '['
-        if (this.reserved)
-            ret += 'r'
-        if (this.doNotFragment)
-            ret += 'd'
-        if (this.moreFragments)
-            ret += 'm'
+
+        if (this.reserved) ret += 'r'
+        if (this.doNotFragment) ret += 'd'
+        if (this.moreFragments) ret += 'm'
+
         ret += ']'
 
         return ret
@@ -66,19 +65,104 @@ export class IPv4Addr {
 export class IPv4 {
     static decoderName = 'ipv4'
 
-    version: number = 0
-    headerLength: number = 0
-    diffserv: number = 0
-    length: number = 0
-    identification: number = 0
+    /**
+     * IP Version.
+     *
+     * This is always 4 in IPv4.
+     */
+    version = 4
+
+    /**
+     * Header Length.
+     *
+     * Contains the size of the IPv4 Header
+     */
+    headerLength?: number
+
+    /**
+     * Differentiated Services Code Point
+     *
+     * @see {@link https://en.wikipedia.org/wiki/Internet_Protocol_version_4#DSCP | DSCP}
+     */
+    diffserv?: number
+
+    /**
+     * Total Length.
+     *
+     * Defines the entire packet size in bytes, including header and data.
+     *
+     * The minimum size is 20 bytes (header without data) and the maximum is 65,535 bytes.
+     */
+    length?: number
+
+    /**
+     * Identification.
+     *
+     * Used for uniquely identifying the group of fragments of a single IP datagram.
+     */
+    identification?: number
+
+    /**
+     * Flags.
+     *
+     * Used to control or identify fragments.
+     * They are (in order, from most significant to least significant):
+     *
+     * - bit 0: Reserved; must be zero.
+     * - bit 1: Don't Fragment (DF).
+     * - bit 2: More Fragments (MF).
+     */
     flags?: IPFlags
-    fragmentOffset: number = 0
-    ttl: number = 0
-    protocol: number = 0
-    headerChecksum: number = 0
+
+    /**
+     * Fragment offset.
+     *
+     * Specifies the offset of a particular fragment relative to the beginning of the original unfragmented IP datagram.
+     *
+     * @see {@link https://en.wikipedia.org/wiki/Internet_Protocol_version_4#Fragment_offset | Fragment Offset}
+     */
+    fragmentOffset?: number
+
+    /**
+     * Time to live.
+     *
+     * Specified in seconds, but time intervals less than 1 second are rounded up to 1.
+     */
+    ttl?: number
+
+    /**
+     * Protocol.
+     *
+     * The protocol used in the data portion of the IP datagram.
+     */
+    protocol?: number
+
+    /**
+     * Header checksum.
+     *
+     * Used for error checking of the header.
+     *
+     * @see {@link https://en.wikipedia.org/wiki/Internet_Protocol_version_4#Header_checksum | Header Checksum}
+     */
+    headerChecksum?: number
+
+    /**
+     * Source address.
+     *
+     * The IPv4 address of the sender of the packet.
+     */
     saddr?: IPv4Addr
+
+    /**
+     * Destination address.
+     *
+     * The IPv4 address of the receiver of the packet.
+     */
     daddr?: IPv4Addr
-    protocolName?: string
+
+    /**
+     * The payload of the packet frame.
+     */
     payload?: ProtocolsType
 
     constructor(
@@ -122,13 +206,11 @@ export class IPv4 {
         this.daddr = new IPv4Addr(this.emitter).decode(rawPacket, offset)
         offset += 4
 
-        // TODO: parse IP "options" if header_length > 5
+        // TODO: parse IP "options" if headerLength > 5
         offset = originalOffset + this.headerLength
 
         // https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
         this.payload = protocols(this.protocol, this.emitter, rawPacket, offset, this.length - this.headerLength)
-        if (this.payload === undefined)
-            this.protocolName = 'Unknown'
 
         if (this.emitter)
             this.emitter.emit(IPv4.decoderName, this)
