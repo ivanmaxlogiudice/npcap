@@ -59,24 +59,18 @@ const codeMessage: Record<number, Record<number | 'default', string>> = {
 export class ICMP {
     static decoderName = 'icmp'
 
-    type: number = 0
-    code: number = 0
-    checksum: number = 0
-
-    constructor(
-        public emitter?: EventEmitter,
-    ) { }
+    type: number
+    code: number
+    checksum: number
 
     // http://en.wikipedia.org/wiki/Internet_Control_Message_Protocol
-    decode(rawPacket: Buffer, offset: number = 0) {
+    constructor(rawPacket: Buffer, offset: number = 0, emitter?: EventEmitter) {
         this.type = rawPacket[offset++]
         this.code = rawPacket[offset++]
         this.checksum = rawPacket.readUInt16BE(offset)
 
-        if (this.emitter)
-            this.emitter.emit(ICMP.decoderName, this)
-
-        return this
+        if (emitter)
+            emitter.emit(ICMP.decoderName, this)
     }
 
     toString() {

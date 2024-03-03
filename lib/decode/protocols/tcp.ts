@@ -2,17 +2,17 @@ import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
 
 export class TCPFlags {
-    nonce?: boolean
-    cwr?: boolean
-    ece?: boolean
-    urg?: boolean
-    ack?: boolean
-    psh?: boolean
-    rst?: boolean
-    syn?: boolean
-    fin?: boolean
+    nonce: boolean
+    cwr: boolean
+    ece: boolean
+    urg: boolean
+    ack: boolean
+    psh: boolean
+    rst: boolean
+    syn: boolean
+    fin: boolean
 
-    decode(firstByte: number, secondByte: number) {
+    constructor(firstByte: number, secondByte: number) {
         this.nonce = Boolean(firstByte & 1)
         this.cwr = Boolean(secondByte & 128)
         this.ece = Boolean(secondByte & 64)
@@ -170,25 +170,21 @@ export class TCPOptions {
 export class Tcp {
     static decoderName = 'tcp'
 
-    sport?: number
-    dport?: number
-    seqno?: number
-    ackno?: number
-    headerLength?: number
-    flags?: TCPFlags
-    windowSize?: number
-    checksum?: number
-    urgentPointer?: number
-    options: any
-    dataLength?: number
-    data?: Buffer | null
-
-    constructor(
-        public emitter?: EventEmitter,
-    ) { }
+    sport: number
+    dport: number
+    seqno: number
+    ackno: number
+    headerLength: number
+    flags: TCPFlags
+    windowSize: number
+    checksum: number
+    urgentPointer: number
+    options?: TCPOptions
+    dataLength: number
+    data: Buffer | null
 
     // http://en.wikipedia.org/wiki/Transmission_Control_Protocol
-    decode(rawPacket: Buffer, offset: number = 0, len: number = 0) {
+    constructor(rawPacket: Buffer, offset: number = 0, len: number = 0, emitter?: EventEmitter) {
         const originalOffset = offset
 
         this.sport = rawPacket.readUInt16BE(offset) // 0, 1
@@ -206,7 +202,7 @@ export class Tcp {
         // The first 4 bits of the next header * 4 tells use the length of the header.
         this.headerLength = (rawPacket[offset] & 0xf0) >> 2
 
-        this.flags = new TCPFlags().decode(rawPacket[offset], rawPacket[offset + 1])
+        this.flags = new TCPFlags(rawPacket[offset], rawPacket[offset + 1])
         offset += 2
 
         this.windowSize = rawPacket.readUInt16BE(offset) // 14, 15
@@ -239,10 +235,8 @@ export class Tcp {
             this.data = null
         }
 
-        if (this.emitter)
-            this.emitter.emit(Tcp.decoderName, this)
-
-        return this
+        if (emitter)
+            emitter.emit(Tcp.decoderName, this)
     }
 
     toString() {

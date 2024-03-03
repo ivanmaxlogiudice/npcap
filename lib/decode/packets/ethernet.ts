@@ -29,19 +29,19 @@ export class EthernetPacket {
     /**
      * Destination Address
      */
-    dhost?: EthernetAddr
+    dhost: EthernetAddr
 
     /**
      * Source Address
      */
-    shost?: EthernetAddr
+    shost: EthernetAddr
 
     /**
      * Determine which protocol is encapsulated in the payload.
      *
      * @see {@link http://en.wikipedia.org/wiki/EtherType | EtherType}
      */
-    type?: number
+    type: number
 
     /**
      * VLAN-tagged (802.1Q)
@@ -55,14 +55,10 @@ export class EthernetPacket {
      *
      * Supported protocols: IPv4, Arp, IPv6.
      */
-    payload?: IPv4 | Arp | IPv6
-
-    constructor(
-        public emitter?: EventEmitter,
-    ) { }
+    payload: IPv4 | Arp | IPv6
 
     // https://en.wikipedia.org/wiki/Ethernet_frame
-    decode(rawPacket: Buffer, offset: number = 0) {
+    constructor(rawPacket: Buffer, offset: number = 0, emitter?: EventEmitter) {
         this.dhost = new EthernetAddr(rawPacket, offset)
         offset += 6
 
@@ -74,7 +70,7 @@ export class EthernetPacket {
 
         // VLAN-tagged (802.1Q)
         if (this.type === PROTOCOL_VLAN) {
-            this.vlan = new Vlan(this.emitter).decode(rawPacket, offset)
+            this.vlan = new Vlan(rawPacket, offset)
             offset += 2
 
             this.type = rawPacket.readUInt16BE(offset)
@@ -83,29 +79,26 @@ export class EthernetPacket {
 
         if (this.type < 1536) {
             // this packet is actually some 802.3 type without an ethertype
-            this.type = 0
+            throw new Error(`802.3 type without an ethertype ${this.type}.`)
         }
         else {
             switch (this.type) {
                 case PROTOCOL_IPV4:
-                    this.payload = new IPv4(this.emitter).decode(rawPacket, offset)
+                    this.payload = new IPv4(rawPacket, offset, emitter)
                     break
                 case PROTOCOL_ARP:
-                    this.payload = new Arp(this.emitter).decode(rawPacket, offset)
+                    this.payload = new Arp(rawPacket, offset, emitter)
                     break
                 case PROTOCOL_IPV6:
-                    this.payload = new IPv6(this.emitter).decode(rawPacket, offset)
+                    this.payload = new IPv6(rawPacket, offset, emitter)
                     break
                 default:
-                    this.payload = undefined
-                    console.log(`NpcapPacket: EthernetPacket() - Dont know how to decode ethertype ${this.type}.`)
+                    throw new Error(`Dont know how to decode ethertype ${this.type}.`)
             }
         }
 
-        if (this.emitter)
-            this.emitter.emit(EthernetPacket.decoderName, this)
-
-        return this
+        if (emitter)
+            emitter.emit(EthernetPacket.decoderName, this)
     }
 
     isIPv4(): this is EthernetPacket & { payload: IPv4 } {

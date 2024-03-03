@@ -12,40 +12,36 @@ export class LLCPacket {
     /**
      * Destination Service Access Point (DSAP).
      */
-    dsap?: number
+    dsap: number
 
     /**
      * Source Service Access Point (SSAP).
      */
-    ssap?: number
+    ssap: number
 
     /**
      * Control Field.
      *
      * @see {@link https://en.wikipedia.org/wiki/IEEE_802.2#Control_Field | Control Field}
      */
-    control?: number
+    control: number
 
     /**
      * Determine which protocol is encapsulated in the payload.
      *
      * @see {@link http://en.wikipedia.org/wiki/EtherType | EtherType}
      */
-    type?: number
+    type: number
 
     /**
      * The payload of the packet frame.
      *
      * Supported protocols: IPv4, Arp, IPv6.
      */
-    payload?: IPv4 | Arp | IPv6
-
-    constructor(
-        public emitter?: EventEmitter,
-    ) {}
+    payload: IPv4 | Arp | IPv6
 
     // https://en.wikipedia.org/wiki/IEEE_802.2#LSAP_Values
-    decode(rawPacket: Buffer, offset: number = 0) {
+    constructor(rawPacket: Buffer, offset: number = 0, emitter?: EventEmitter) {
         this.dsap = rawPacket[offset++]
         this.ssap = rawPacket[offset++]
 
@@ -58,38 +54,32 @@ export class LLCPacket {
             offset += 2
 
             if (this.type < 1536) {
-                console.log(`NpcapPacket: LLCPacket() - 802.3 type without type ${this.type}.`)
-                console.log(this)
-
                 // this packet is actually some 802.3 type without an ethertype
-                this.type = 0
+                throw new Error(`802.3 type without an ethertype ${this.type}.`)
             }
             else {
                 // http://en.wikipedia.org/wiki/EtherType
                 switch (this.type) {
                     case PROTOCOL_IPV4:
-                        this.payload = new IPv4(this.emitter).decode(rawPacket, offset)
+                        this.payload = new IPv4(rawPacket, offset, emitter)
                         break
                     case PROTOCOL_ARP:
-                        this.payload = new Arp(this.emitter).decode(rawPacket, offset)
+                        this.payload = new Arp(rawPacket, offset, emitter)
                         break
                     case PROTOCOL_IPV6:
-                        this.payload = new IPv6(this.emitter).decode(rawPacket, offset)
+                        this.payload = new IPv6(rawPacket, offset, emitter)
                         break
                     default:
-                        this.payload = undefined
-                        console.log(`NpcapPacket: LLCPacket() - Dont know how to decode type ${this.type}.`)
+                        throw new Error(`NpcapPacket: LLCPacket() - Dont know how to decode type ${this.type}.`)
                 }
             }
         }
         else {
-            console.log(`NpcapPacket: LLCPacket() - Unknown LLC types: DSAP: ${this.dsap}, SSAP: ${this.ssap}.`)
+            throw new Error(`NpcapPacket: LLCPacket() - Unknown LLC types: DSAP: ${this.dsap}, SSAP: ${this.ssap}.`)
         }
 
-        if (this.emitter)
-            this.emitter.emit(LLCPacket.decoderName, this)
-
-        return this
+        if (emitter)
+            emitter.emit(LLCPacket.decoderName, this)
     }
 
     isIPv4(): this is LLCPacket & { payload: IPv4 } {

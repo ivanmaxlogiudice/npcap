@@ -21,31 +21,25 @@ const typeMessage: Record<number, string> = {
 export class IGMP {
     static decoderName = 'igmp'
 
-    type!: number
-    maxResponseTime!: number
-    checksum!: number
-    groupAddress!: IPv4Addr
+    type: number
+    maxResponseTime: number
+    checksum: number
+    groupAddress: IPv4Addr
     version: number = 0
-
-    constructor(
-        public emitter?: EventEmitter,
-    ) { }
 
     // IGMP v3
     // https://en.wikipedia.org/wiki/Internet_Group_Management_Protocol
-    decode(rawPacket: Buffer, offset: number = 0) {
+    constructor(rawPacket: Buffer, offset: number = 0, emitter?: EventEmitter) {
         this.type = rawPacket[offset]
         this.maxResponseTime = rawPacket[offset + 1]
         this.checksum = rawPacket.readUInt16BE(offset + 2) // 2, 3
-        this.groupAddress = new IPv4Addr().decode(rawPacket, offset + 4) // 4, 5, 6, 7
+        this.groupAddress = new IPv4Addr(rawPacket, offset + 4) // 4, 5, 6, 7
 
         if (this.type in typeVersion)
             this.version = typeVersion[this.type]
 
-        if (this.emitter)
-            this.emitter.emit(IGMP.decoderName, this)
-
-        return this
+        if (emitter)
+            emitter.emit(IGMP.decoderName, this)
     }
 
     toString() {

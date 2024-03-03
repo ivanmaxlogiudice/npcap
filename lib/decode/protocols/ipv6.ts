@@ -5,9 +5,9 @@ import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
 
 export class IPv6Addr {
-    addr: number[] = Array.from({ length: 16 })
+    addr = Array.from<number>({ length: 16 })
 
-    decode(rawPacket: Buffer, offset: number = 0) {
+    constructor(rawPacket: Buffer, offset: number = 0) {
         this.addr[0] = rawPacket[offset + 0]
         this.addr[1] = rawPacket[offset + 1]
         this.addr[2] = rawPacket[offset + 2]
@@ -24,8 +24,6 @@ export class IPv6Addr {
         this.addr[13] = rawPacket[offset + 13]
         this.addr[14] = rawPacket[offset + 14]
         this.addr[15] = rawPacket[offset + 15]
-
-        return this
     }
 
     toString() {
@@ -42,14 +40,14 @@ export class IPv6 {
     /**
      * IP Version.
      */
-    version?: number
+    version: number
 
     /**
      * Traffic Class.
      *
      * Determine class or priority of IPv6 packet.
      */
-    trafficClass?: number
+    trafficClass: number
 
     /**
      * Flow Label.
@@ -57,7 +55,7 @@ export class IPv6 {
      * Used by a source to label the packets belonging to the same flow in order to request special
      * handling by intermediate IPv6 routers, such as non-default quality of service or real-time service.
      */
-    flowLabel?: number
+    flowLabel: number
 
     /**
      * Payload Length.
@@ -65,7 +63,7 @@ export class IPv6 {
      * Indicates the total size of the payload which tells routers about
      * the amount of information a particular packet contains in its payload.
      */
-    payloadLength?: number
+    payloadLength: number
 
     /**
      * Next Header.
@@ -73,7 +71,7 @@ export class IPv6 {
      * Indicates the type of extension header(if present)
      * immediately following the IPv6 header.
      */
-    nextHeader?: number
+    nextHeader: number
 
     /**
      * Hop Limit.
@@ -83,33 +81,29 @@ export class IPv6 {
      * Its value gets decremented by one, by each node that forwards
      * the packet and the packet is discarded if the value decrements to 0.
      */
-    hopLimit?: number
+    hopLimit: number
 
     /**
      * Source Address.
      *
      * The IPv6 address of the original source of the packet.
      */
-    saddr?: IPv6Addr
+    saddr: IPv6Addr
 
     /**
      * Destination Address.
      *
      * The IPv6 address of the final destination(in most cases).
      */
-    daddr?: IPv6Addr
+    daddr: IPv6Addr
 
     /**
      * The payload of the packet frame.
      */
-    payload?: ProtocolsType
-
-    constructor(
-        public emitter?: EventEmitter,
-    ) { }
+    payload: ProtocolsType
 
     // https://www.geeksforgeeks.org/internet-protocol-version-6-ipv6-header/
-    decode(rawPacket: Buffer, offset: number = 0) {
+    constructor(rawPacket: Buffer, offset: number = 0, emitter?: EventEmitter) {
         const originalOffset = offset
 
         this.version = ((rawPacket[offset] & 0xf0) >> 4) // first 4 bits
@@ -121,28 +115,21 @@ export class IPv6 {
         this.nextHeader = rawPacket[offset + 6]
         this.hopLimit = rawPacket[offset + 7]
 
-        this.saddr = new IPv6Addr().decode(rawPacket, offset + 8)
-        this.daddr = new IPv6Addr().decode(rawPacket, offset + 24)
+        this.saddr = new IPv6Addr(rawPacket, offset + 8)
+        this.daddr = new IPv6Addr(rawPacket, offset + 24)
 
         offset = originalOffset + 40
 
         // https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
-        this.payload = protocols(this.nextHeader, this.emitter, rawPacket, offset, rawPacket.length - 40)
+        this.payload = protocols(this.nextHeader, emitter, rawPacket, offset, rawPacket.length - 40)
 
-        if (this.emitter)
-            this.emitter.emit(IPv6.decoderName, this)
+        if (emitter)
+            emitter.emit(IPv6.decoderName, this)
 
         return this
     }
 
     toString() {
-        let ret = `${this.saddr} -> ${this.daddr} `
-
-        if (this.payload === undefined)
-            ret += `proto ${this.nextHeader}`
-        else
-            ret += this.payload.constructor.name
-
-        return `${ret} ${this.payload}`
+        return `${this.saddr} -> ${this.daddr} ${this.payload.constructor.name} ${this.payload}`
     }
 }

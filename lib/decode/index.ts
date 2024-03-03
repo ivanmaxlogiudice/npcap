@@ -19,15 +19,11 @@ export class NpcapHeader {
 }
 
 export class NpcapDecode {
-    linkType?: LinkType
-    npcapHeader?: NpcapHeader
-    payload?: EthernetPacket | NullPacket | IPv4 | SLLPacket
+    linkType: LinkType
+    npcapHeader: NpcapHeader
+    payload: EthernetPacket | NullPacket | IPv4 | SLLPacket
 
-    constructor(
-        public emitter?: EventEmitter,
-    ) {}
-
-    decode(packet: PacketData) {
+    constructor(packet: PacketData, emitter?: EventEmitter) {
         this.linkType = packet.linkType
         this.npcapHeader = new NpcapHeader(packet.header)
 
@@ -35,19 +31,19 @@ export class NpcapDecode {
 
         switch (this.linkType) {
             case 'LINKTYPE_ETHERNET':
-                this.payload = new EthernetPacket(this.emitter).decode(buffer)
+                this.payload = new EthernetPacket(buffer, 0, emitter)
                 break
             case 'LINKTYPE_NULL':
-                this.payload = new NullPacket(this.emitter).decode(buffer)
+                this.payload = new NullPacket(buffer, 0, emitter)
                 break
             case 'LINKTYPE_RAW':
-                this.payload = new IPv4(this.emitter).decode(buffer)
+                this.payload = new IPv4(buffer, 0, emitter)
                 break
             case 'LINKTYPE_LINUX_SLL':
-                this.payload = new SLLPacket(this.emitter).decode(buffer)
+                this.payload = new SLLPacket(buffer, 0, emitter)
                 break
             default:
-                console.log(`[NpcapPacket] Unknown decode link type '${this.linkType}'.`)
+                throw new Error(`[NpcapPacket] Unknown decode link type '${this.linkType}'.`)
         }
 
         return this
@@ -75,5 +71,5 @@ export class NpcapDecode {
 }
 
 export function decode(packet: PacketData, emitter?: EventEmitter) {
-    return new NpcapDecode(emitter).decode(packet)
+    return new NpcapDecode(packet, emitter)
 }

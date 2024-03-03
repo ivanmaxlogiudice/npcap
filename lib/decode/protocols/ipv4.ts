@@ -5,21 +5,14 @@ import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
 
 export class IPFlags {
-    emitter?: EventEmitter
-    reserved?: boolean
-    doNotFragment?: boolean
-    moreFragments?: boolean
+    reserved: boolean
+    doNotFragment: boolean
+    moreFragments: boolean
 
-    constructor(emitter?: EventEmitter) {
-        this.emitter = emitter
-    }
-
-    decode(rawFlags: number): IPFlags {
+    constructor(rawFlags: number) {
         this.reserved = Boolean((rawFlags & 0x80) >> 7)
         this.doNotFragment = Boolean((rawFlags & 0x40) > 0)
         this.moreFragments = Boolean((rawFlags & 0x20) > 0)
-
-        return this
     }
 
     toString() {
@@ -36,25 +29,13 @@ export class IPFlags {
 }
 
 export class IPv4Addr {
-    static decoderName = 'ipv4-addr'
-
-    emitter?: EventEmitter
     addr: number[] = Array.from({ length: 4 })
 
-    constructor(emitter?: EventEmitter) {
-        this.emitter = emitter
-    }
-
-    decode(rawPacket: Buffer, offset: number = 0) {
+    constructor(rawPacket: Buffer, offset: number = 0) {
         this.addr[0] = rawPacket[offset]
         this.addr[1] = rawPacket[offset + 1]
         this.addr[2] = rawPacket[offset + 2]
         this.addr[3] = rawPacket[offset + 3]
-
-        if (this.emitter)
-            this.emitter.emit(IPv4Addr.decoderName, this)
-
-        return this
     }
 
     toString() {
@@ -77,14 +58,14 @@ export class IPv4 {
      *
      * Contains the size of the IPv4 Header
      */
-    headerLength?: number
+    headerLength: number
 
     /**
      * Differentiated Services Code Point
      *
      * @see {@link https://en.wikipedia.org/wiki/Internet_Protocol_version_4#DSCP | DSCP}
      */
-    diffserv?: number
+    diffserv: number
 
     /**
      * Total Length.
@@ -93,14 +74,14 @@ export class IPv4 {
      *
      * The minimum size is 20 bytes (header without data) and the maximum is 65,535 bytes.
      */
-    length?: number
+    length: number
 
     /**
      * Identification.
      *
      * Used for uniquely identifying the group of fragments of a single IP datagram.
      */
-    identification?: number
+    identification: number
 
     /**
      * Flags.
@@ -112,7 +93,7 @@ export class IPv4 {
      * - bit 1: Don't Fragment (DF).
      * - bit 2: More Fragments (MF).
      */
-    flags?: IPFlags
+    flags: IPFlags
 
     /**
      * Fragment offset.
@@ -121,21 +102,21 @@ export class IPv4 {
      *
      * @see {@link https://en.wikipedia.org/wiki/Internet_Protocol_version_4#Fragment_offset | Fragment Offset}
      */
-    fragmentOffset?: number
+    fragmentOffset: number
 
     /**
      * Time to live.
      *
      * Specified in seconds, but time intervals less than 1 second are rounded up to 1.
      */
-    ttl?: number
+    ttl: number
 
     /**
      * Protocol.
      *
      * The protocol used in the data portion of the IP datagram.
      */
-    protocol?: number
+    protocol: number
 
     /**
      * Header checksum.
@@ -144,33 +125,29 @@ export class IPv4 {
      *
      * @see {@link https://en.wikipedia.org/wiki/Internet_Protocol_version_4#Header_checksum | Header Checksum}
      */
-    headerChecksum?: number
+    headerChecksum: number
 
     /**
      * Source address.
      *
      * The IPv4 address of the sender of the packet.
      */
-    saddr?: IPv4Addr
+    saddr: IPv4Addr
 
     /**
      * Destination address.
      *
      * The IPv4 address of the receiver of the packet.
      */
-    daddr?: IPv4Addr
+    daddr: IPv4Addr
 
     /**
      * The payload of the packet frame.
      */
-    payload?: ProtocolsType
-
-    constructor(
-        public emitter?: EventEmitter,
-    ) { }
+    payload: ProtocolsType
 
     // http://en.wikipedia.org/wiki/IPv4
-    decode(rawPacket: Buffer, offset: number = 0) {
+    constructor(rawPacket: Buffer, offset: number = 0, emitter?: EventEmitter) {
         const originalOffset = offset
 
         this.version = (rawPacket[offset] & 0xf0) >> 4
@@ -186,7 +163,7 @@ export class IPv4 {
         this.identification = rawPacket.readUInt16BE(offset)
         offset += 2
 
-        this.flags = new IPFlags(this.emitter).decode(rawPacket[offset])
+        this.flags = new IPFlags(rawPacket[offset])
         // flags only uses the top 3 bits of offset so don't advance yet
         this.fragmentOffset = ((rawPacket.readUInt16BE(offset) & 0x1fff) << 3) // 13-bits from 6, 7
         offset += 2
@@ -200,36 +177,29 @@ export class IPv4 {
         this.headerChecksum = rawPacket.readUInt16BE(offset)
         offset += 2
 
-        this.saddr = new IPv4Addr(this.emitter).decode(rawPacket, offset)
+        this.saddr = new IPv4Addr(rawPacket, offset)
         offset += 4
 
-        this.daddr = new IPv4Addr(this.emitter).decode(rawPacket, offset)
+        this.daddr = new IPv4Addr(rawPacket, offset)
         offset += 4
 
         // TODO: parse IP "options" if headerLength > 5
         offset = originalOffset + this.headerLength
 
         // https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
-        this.payload = protocols(this.protocol, this.emitter, rawPacket, offset, this.length - this.headerLength)
+        this.payload = protocols(this.protocol, emitter, rawPacket, offset, this.length - this.headerLength)
 
-        if (this.emitter)
-            this.emitter.emit(IPv4.decoderName, this)
-
-        return this
+        if (emitter)
+            emitter.emit(IPv4.decoderName, this)
     }
 
     toString() {
-        let ret = `${this.saddr} -> ${this.daddr} `
-        const flags = this.flags?.toString() || ''
+        let ret = `${this.saddr} -> ${this.daddr}`
+        const flags = this.flags.toString()
 
         if (flags.length > 2)
-            ret += `flags ${flags} `
+            ret += ` flags ${flags}`
 
-        if (this.payload === undefined)
-            ret += `protocol ${this.protocol}`
-        else
-            ret += this.payload.constructor.name
-
-        return `${ret} ${this.payload}`
+        return `${ret} ${this.payload.constructor.name} ${this.payload}`
     }
 }

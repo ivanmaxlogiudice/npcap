@@ -1,17 +1,14 @@
 import type { ProtocolsType } from '../ip-protocols'
 import { protocols } from '../ip-protocols'
 import type { Buffer } from 'node:buffer'
+import type EventEmitter from 'node:events'
 
 export class NoNext {
-    error?: string
-
-    decode(rawPacket: Buffer, offset: number = 0) {
+    constructor(rawPacket: Buffer, offset: number = 0) {
         const remainingLength = rawPacket.length - offset
 
         if (remainingLength !== 0)
-            this.error = `There is more packet left to be parse, but NoNext.decode was called with ${remainingLength} bytes left.`
-
-        return this
+            throw new Error(`There is more packet left to be parse, but NoNext.decode was called with ${remainingLength} bytes left.`)
     }
 
     toString() {
@@ -20,23 +17,24 @@ export class NoNext {
 }
 
 export class HeaderExtension {
-    payload?: ProtocolsType
-    nextHeader?: number
-    headerLength?: number
-    protocolName?: string
+    static decoderName = 'header-extension'
 
-    decode(rawPacket: Buffer, offset: number = 0) {
+    nextHeader: number
+    headerLength: number
+    payload: ProtocolsType
+
+    constructor(rawPacket: Buffer, offset: number = 0, emitter?: EventEmitter) {
         const originalOffset = offset
+
         this.nextHeader = rawPacket[offset++]
         this.headerLength = (rawPacket[offset++] + 1) * 8
 
         offset = originalOffset + this.headerLength
 
         this.payload = protocols(this.nextHeader, undefined, rawPacket, offset, rawPacket.length - offset)
-        if (this.payload === undefined)
-            this.protocolName = 'Unknown'
 
-        return this
+        if (emitter)
+            emitter.emit(HeaderExtension.decoderName, this)
     }
 
     toString() {
