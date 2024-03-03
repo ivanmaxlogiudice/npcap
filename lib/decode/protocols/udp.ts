@@ -5,12 +5,38 @@ import type EventEmitter from 'node:events'
 export class Udp {
     static decoderName = 'udp'
 
-    sport: number = 0
-    dport: number = 0
-    length: number = 0
-    checksum: number = 0
+    /**
+     * Source port number.
+     */
+    sport: number
+
+    /**
+     * Destination port number.
+     */
+    dport: number
+
+    /**
+     * Length.
+     *
+     * Specifies the length in bytes of the UDP header and UDP data.
+     *
+     * The minimum length is 8 bytes, the length of the header.
+     */
+    length: number
+
+    /**
+     * Checksum.
+     *
+     * Used for error-checking of the header and data.
+     */
+    checksum: number
+
+    /**
+     * Data Buffer.
+     */
     data: Buffer
 
+    // https://en.wikipedia.org/wiki/User_Datagram_Protocol
     constructor(rawPacket: Buffer, offset: number = 0, emitter?: EventEmitter) {
         this.sport = rawPacket.readUInt16BE(offset)
         offset += 2
@@ -33,7 +59,7 @@ export class Udp {
     toString() {
         let ret = `UDP ${this.sport} -> ${this.dport} len ${this.length}`
 
-        if (Number(this.sport) === 53 || Number(this.dport) === 53)
+        if (this.sport === 53 || this.dport === 53)
             ret += (new DNS(this.data, 0).toString())
 
         return ret
