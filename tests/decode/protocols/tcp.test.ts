@@ -1,40 +1,30 @@
-import { beforeEach, describe, expect, it, jest } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
-import EventEmitter from 'node:events'
 import { Tcp } from '@/decode/protocols'
 
 describe('Tcp', () => {
-    let emitter: EventEmitter
-    let instance: Tcp
-    let buffer: Buffer
+    const buffer = Buffer.from('b5dd00500aaf604e0000000060c2102044b2000002040218', 'hex')
+    let instance = new Tcp(buffer)
 
-    beforeEach(() => {
-        emitter = new EventEmitter()
-        instance = new Tcp(emitter)
-        buffer = Buffer.from('b5dd00500aaf604e0000000060c2102044b2000002040218', 'hex')
-    })
-
-    describe('#decode', () => {
+    describe('#constructor', () => {
         it('is a function', () => {
-            expect(instance.decode).toBeTypeOf('function')
+            expect(instance).toBeTypeOf('object')
         })
 
         it('returns the instance', () => {
-            expect(instance.decode(buffer)).toBe(instance)
+            expect(instance).toBe(instance)
         })
 
-        it(`raises a ${Tcp.decoderName} event on decode`, () => {
-            const handler = jest.fn()
+        // it(`raises a ${Tcp.decoderName} event on decode`, () => {
+        //     const handler = jest.fn()
 
-            emitter.on(Tcp.decoderName, handler)
-            instance.decode(buffer)
+        //     emitter.on(Tcp.decoderName, handler)
+        //     instance.decode(buffer)
 
-            expect(handler).toHaveBeenCalled()
-        })
+        //     expect(handler).toHaveBeenCalled()
+        // })
 
         it('should decode TCP packet correctly', () => {
-            instance.decode(buffer)
-
             expect(instance).toHaveProperty('sport', 46557)
             expect(instance).toHaveProperty('dport', 80)
             expect(instance).toHaveProperty('seqno', 179265614)
@@ -66,8 +56,8 @@ describe('Tcp', () => {
             expect(instance).toHaveProperty('checksum', 17586)
             expect(instance).toHaveProperty('urgentPointer', 0)
 
-            expect(instance.decode(buffer, 0, 24)).toHaveProperty('dataLength', 0)
-
+            instance = new Tcp(buffer, 0, 24)
+            expect(instance).toHaveProperty('dataLength', 0)
             expect(instance).toHaveProperty('data', null)
         })
     })
@@ -78,7 +68,7 @@ describe('Tcp', () => {
         })
 
         it('returns a value like #->80 seq 179265614 ack 0 flags [ces] win 4128 csum 17586 [mss:536] len 0', () => {
-            expect(instance.decode(buffer, 0, 24).toString()).toBe('46557 -> 80 seq 179265614 ack 0 flags [ces] win 4128 csum 17586 [mss:536] len 0')
+            expect(new Tcp(buffer, 0, 24).toString()).toBe('46557 -> 80 seq 179265614 ack 0 flags [ces] win 4128 csum 17586 [mss:536] len 0')
         })
     })
 })

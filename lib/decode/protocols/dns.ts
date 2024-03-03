@@ -41,16 +41,16 @@ const DnsRrClasses: Record<number, string> = {
 }
 
 class DNSFlags {
-    isResponse?: boolean
-    opcode?: number
-    isAuthority?: boolean
-    isTruncated?: boolean
-    isRecursionDesired?: boolean
-    isRecursionAvailible?: boolean
-    z?: number
-    responseCode?: number
+    isResponse: boolean
+    opcode: number
+    isAuthority: boolean
+    isTruncated: boolean
+    isRecursionDesired: boolean
+    isRecursionAvailible: boolean
+    z: number
+    responseCode: number
 
-    decode(rawPacket: Buffer, offset: number = 0) {
+    constructor(rawPacket: Buffer, offset: number = 0) {
         const firstByte = rawPacket[offset]
         const secondByte = rawPacket[offset + 1]
 
@@ -68,8 +68,8 @@ class DNSFlags {
     }
 
     toString() {
-        return `{ isResponse: ${this.isResponse} opcode: ${this.opcode} isAuthority: ${this.isAuthority}} isTruncated: ${this.isTruncated}`
-            + ` isRecursionDesired: ${this.isRecursionDesired} isRecursionAvailible: ${this.isRecursionAvailible} z: ${this.z} responseCode: ${this.responseCode} }`
+        return `isResponse: ${this.isResponse} opcode: ${this.opcode} isAuthority: ${this.isAuthority}} isTruncated: ${this.isTruncated}`
+            + ` isRecursionDesired: ${this.isRecursionDesired} isRecursionAvailible: ${this.isRecursionAvailible} z: ${this.z} responseCode: ${this.responseCode}`
     }
 }
 
@@ -131,32 +131,27 @@ class DNSRRSet {
 export class DNS {
     static decoderName = 'dns'
 
-    rawPacket!: Buffer
+    rawPacket: Buffer
     offset: number = 0
-    id?: number
-    header!: DNSFlags
-    qdcount!: number
-    ancount!: number
-    nscount!: number
-    arcount!: number
-    question?: DNSRRSet
-    answer?: DNSRRSet
-    authority?: DNSRRSet
-    additional?: DNSRRSet
-    _error?: string
-
-    constructor(
-        public emitter?: EventEmitter,
-    ) { }
+    id: number
+    header: DNSFlags
+    qdcount: number
+    ancount: number
+    nscount: number
+    arcount: number
+    question: DNSRRSet
+    answer: DNSRRSet
+    authority: DNSRRSet
+    additional: DNSRRSet
 
     // http://tools.ietf.org/html/rfc1035
-    decode(rawPacket: Buffer, offset: number = 0) {
+    constructor(rawPacket: Buffer, offset: number = 0, emitter?: EventEmitter) {
         // these 2 fields will be deleted soon.
         this.rawPacket = rawPacket
         this.offset = offset
 
         this.id = rawPacket.readUInt16BE(offset) // 0, 1
-        this.header = new DNSFlags().decode(rawPacket, offset + 2)
+        this.header = new DNSFlags(rawPacket, offset + 2)
         this.qdcount = rawPacket.readUInt16BE(offset + 4) // 4, 5
         this.ancount = rawPacket.readUInt16BE(offset + 6) // 6, 7
         this.nscount = rawPacket.readUInt16BE(offset + 8) // 8, 9
@@ -168,17 +163,13 @@ export class DNS {
         this.authority = this.#decode_RRs(this.nscount, false)
         this.additional = this.#decode_RRs(this.arcount, false)
 
-        if (this.emitter)
-            this.emitter.emit(DNS.decoderName, this)
-
-        return this
+        if (emitter)
+            emitter.emit(DNS.decoderName, this)
     }
 
     #decode_RRs(count: number, isQuestion: boolean) {
-        if (count > 100) {
-            this._error = `Malformed DNS packet: too many RRs at offset ${this.offset}`
-            return undefined
-        }
+        if (count > 100)
+            throw new Error(`Malformed DNS packet: too many RRs at offset ${this.offset}`)
 
         const ret = new DNSRRSet(count)
         for (let i = 0; i < count; i++)
@@ -211,14 +202,14 @@ export class DNS {
         this.offset += 2
 
         if (rr.type === 1 && rr.classNum === 1 && rr.rdlength) { // A, IN
-            rr.rdata = new IPv4Addr().decode(this.rawPacket, this.offset).toString()
+            rr.rdata = new IPv4Addr(this.rawPacket, this.offset).toString()
         }
         else if (rr.type === 2 && rr.classNum === 1) { // NS, IN
             rr.rdata = this.#readName()
             this.offset -= rr.rdlength // readName moves offset
         }
         else if (rr.type === 28 && rr.classNum === 1 && rr.rdlength === 16) {
-            rr.data = new IPv6Addr().decode(this.rawPacket, this.offset)
+            rr.data = new IPv6Addr(this.rawPacket, this.offset)
         }
         // TODO - decode other rr types
 

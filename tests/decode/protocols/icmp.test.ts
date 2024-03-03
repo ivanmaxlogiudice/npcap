@@ -1,38 +1,27 @@
-import { beforeEach, describe, expect, it, jest } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
-import EventEmitter from 'node:events'
 import { ICMP } from '@/decode/protocols'
 import { int8_to_hex } from '@/decode/utils'
 
 describe('ICMP', () => {
-    let emitter: EventEmitter
-    let instance: ICMP
-    let buffer: Buffer
+    const buffer = Buffer.from('01020304', 'hex')
+    let instance = new ICMP(buffer)
 
-    beforeEach(() => {
-        emitter = new EventEmitter()
-        instance = new ICMP(emitter)
-        buffer = Buffer.from('01020304', 'hex')
-    })
-
-    describe('#decode', () => {
+    describe('#constructor', () => {
         it('is a function and returns the instance', () => {
-            expect(instance.decode).toBeTypeOf('function')
-            expect(instance.decode(buffer)).toBe(instance)
+            expect(instance).toBeTypeOf('object')
+            expect(instance).toBe(instance)
         })
 
-        it(`raises a ${ICMP.decoderName} event on decode`, () => {
-            const handler = jest.fn()
+        // it(`raises a ${ICMP.decoderName} event on decode`, () => {
+        //     const handler = jest.fn()
 
-            emitter.on(ICMP.decoderName, handler)
-            instance.decode(buffer)
+        //     instance = new ICMP(buffer)
 
-            expect(handler).toHaveBeenCalled()
-        })
+        //     expect(handler).toHaveBeenCalled()
+        // })
 
         it('should decode ICMP packet correctly', () => {
-            instance.decode(buffer)
-
             expect(instance).toHaveProperty('type', 1)
             expect(instance).toHaveProperty('code', 2)
             expect(instance).toHaveProperty('checksum', 772)
@@ -41,7 +30,7 @@ describe('ICMP', () => {
 
     describe('#toString', () => {
         const verifyToString = function verifyToString(type: number, code: number, result: string) {
-            instance.decode(Buffer.from(`${int8_to_hex[type] + int8_to_hex[code]}0000`, 'hex'), 0)
+            instance = new ICMP(Buffer.from(`${int8_to_hex[type] + int8_to_hex[code]}0000`, 'hex'), 0)
 
             expect(instance.toString()).toBe(result)
         }

@@ -1,16 +1,11 @@
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
-import EventEmitter from 'node:events'
 import { EthernetAddr, EthernetPacket } from '@/decode/packets'
 import { IPv4 } from '@/decode/protocols'
 import { PROTOCOL_IPV4 } from '@/types'
 
 describe('EthernetAddr', () => {
-    let instance: EthernetAddr
-
-    beforeEach(() => {
-        instance = new EthernetAddr(Buffer.from('010203040506', 'hex'))
-    })
+    const instance = new EthernetAddr(Buffer.from('010203040506', 'hex'))
 
     describe('constructor', () => {
         it('is a function and returns the instance', () => {
@@ -35,7 +30,6 @@ describe('EthernetAddr', () => {
 })
 
 describe('EthernetPacket', () => {
-    let emitter: EventEmitter
     let instance: EthernetPacket
     const bufferIPv4WithoutVLAN = Buffer.from(
         'e8ada60b3fd4' // dhost
@@ -52,14 +46,9 @@ describe('EthernetPacket', () => {
         'hex',
     )
 
-    beforeEach(() => {
-        emitter = new EventEmitter()
-        instance = new EthernetPacket(emitter)
-    })
-
-    describe('#decode', () => {
+    describe('#constructor', () => {
         it('should decode IPv4 without VLAN', () => {
-            instance.decode(bufferIPv4WithoutVLAN)
+            instance = new EthernetPacket(bufferIPv4WithoutVLAN)
 
             expect(instance).toHaveProperty('dhost.addr', [232, 173, 166, 11, 63, 212])
             expect(instance).toHaveProperty('shost.addr', [76, 52, 136, 180, 178, 172])
@@ -70,7 +59,7 @@ describe('EthernetPacket', () => {
         })
 
         it('should decode IPv4 with VLAN', () => {
-            instance.decode(bufferIPv4WithVLAN)
+            instance = new EthernetPacket(bufferIPv4WithVLAN)
 
             expect(instance).toHaveProperty('dhost.addr', [170, 187, 204, 221, 238, 255])
             expect(instance).toHaveProperty('shost.addr', [17, 34, 51, 68, 85, 102])
@@ -85,15 +74,15 @@ describe('EthernetPacket', () => {
 
     describe('#toString', () => {
         it('should return IPv4 string representation without VLAN', () => {
-            instance.decode(bufferIPv4WithoutVLAN)
-
-            expect(instance.toString()).toBe('4c:34:88:b4:b2:ac -> e8:ad:a6:0b:3f:d4 IPv4 192.168.0.6 -> 99.181.81.5 flags [d] Tcp 50144 -> 443 seq 1903998038 ack 1647900447 flags [a] win 65250 csum 63169 [.] len 0')
+            expect(
+                new EthernetPacket(bufferIPv4WithoutVLAN).toString(),
+            ).toBe('4c:34:88:b4:b2:ac -> e8:ad:a6:0b:3f:d4 IPv4 192.168.0.6 -> 99.181.81.5 flags [d] Tcp 50144 -> 443 seq 1903998038 ack 1647900447 flags [a] win 65250 csum 63169 [.] len 0')
         })
 
         it('should return IPv6 string representation with VLAN', () => {
-            instance.decode(bufferIPv4WithVLAN)
-
-            expect(instance.toString()).toBe('11:22:33:44:55:66 -> aa:bb:cc:dd:ee:ff vlan 0 0 1 IPv4 192.168.33.1 -> 239.255.255.250 flags [d] IGMP Membership Report')
+            expect(
+                new EthernetPacket(bufferIPv4WithVLAN).toString(),
+            ).toBe('11:22:33:44:55:66 -> aa:bb:cc:dd:ee:ff vlan 0 0 1 IPv4 192.168.33.1 -> 239.255.255.250 flags [d] IGMP Membership Report')
         })
     })
 })
