@@ -39,22 +39,76 @@ export class IPv6Addr {
 export class IPv6 {
     static decoderName = 'ipv6'
 
-    version!: number
-    trafficClass!: number
-    flowLabel!: number
-    payloadLength!: number
-    nextHeader!: number
-    hopLimit!: number
-    saddr!: IPv6Addr
-    daddr!: IPv6Addr
+    /**
+     * IP Version.
+     */
+    version?: number
+
+    /**
+     * Traffic Class.
+     *
+     * Determine class or priority of IPv6 packet.
+     */
+    trafficClass?: number
+
+    /**
+     * Flow Label.
+     *
+     * Used by a source to label the packets belonging to the same flow in order to request special
+     * handling by intermediate IPv6 routers, such as non-default quality of service or real-time service.
+     */
+    flowLabel?: number
+
+    /**
+     * Payload Length.
+     *
+     * Indicates the total size of the payload which tells routers about
+     * the amount of information a particular packet contains in its payload.
+     */
+    payloadLength?: number
+
+    /**
+     * Next Header.
+     *
+     * Indicates the type of extension header(if present)
+     * immediately following the IPv6 header.
+     */
+    nextHeader?: number
+
+    /**
+     * Hop Limit.
+     *
+     * Indicates the maximum number of intermediate nodes IPv6 packet is allowed to travel.
+     *
+     * Its value gets decremented by one, by each node that forwards
+     * the packet and the packet is discarded if the value decrements to 0.
+     */
+    hopLimit?: number
+
+    /**
+     * Source Address.
+     *
+     * The IPv6 address of the original source of the packet.
+     */
+    saddr?: IPv6Addr
+
+    /**
+     * Destination Address.
+     *
+     * The IPv6 address of the final destination(in most cases).
+     */
+    daddr?: IPv6Addr
+
+    /**
+     * The payload of the packet frame.
+     */
     payload?: ProtocolsType
-    protocolName?: string
 
     constructor(
         public emitter?: EventEmitter,
     ) { }
 
-    // http://en.wikipedia.org/wiki/IPv6
+    // https://www.geeksforgeeks.org/internet-protocol-version-6-ipv6-header/
     decode(rawPacket: Buffer, offset: number = 0) {
         const originalOffset = offset
 
@@ -74,8 +128,6 @@ export class IPv6 {
 
         // https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
         this.payload = protocols(this.nextHeader, this.emitter, rawPacket, offset, rawPacket.length - 40)
-        if (this.payload === undefined)
-            this.protocolName = 'Unknown'
 
         if (this.emitter)
             this.emitter.emit(IPv6.decoderName, this)
