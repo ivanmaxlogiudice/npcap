@@ -1,4 +1,5 @@
 import type { ProtocolsType } from '../ip-protocols'
+import { HeaderExtension, ICMP, IGMP, IPv4, NoNext, Tcp, Udp } from '.'
 import { protocols } from '../ip-protocols'
 import { int8_to_hex as hex } from '../utils'
 import type { Buffer } from 'node:buffer'
@@ -127,6 +128,38 @@ export class IPv6 {
             emitter.emit(IPv6.decoderName, this)
 
         return this
+    }
+
+    isHeaderExtension(): this is { payload: HeaderExtension } {
+        return this.payload instanceof HeaderExtension
+    }
+
+    isICMP(): this is { payload: ICMP } {
+        return this.payload instanceof ICMP
+    }
+
+    isIGMP(): this is { payload: IGMP } {
+        return this.payload instanceof IGMP
+    }
+
+    isIPv4(): this is { payload: IPv4 } {
+        return this.payload instanceof IPv4
+    }
+
+    isTcp(): this is { payload: Tcp } {
+        return this.payload instanceof Tcp
+    }
+
+    isUdp(): this is { payload: Udp } {
+        return this.payload instanceof Udp
+    }
+
+    isIPv6(): this is { payload: IPv6 } {
+        return this.payload instanceof IPv6
+    }
+
+    isNoNext(): this is { payload: NoNext } {
+        return this.payload instanceof NoNext
     }
 
     toString() {

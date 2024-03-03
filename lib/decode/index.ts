@@ -49,20 +49,20 @@ export class NpcapDecode {
         return this
     }
 
-    isEthernet(): this is NpcapDecode & { payload: EthernetPacket } {
-        return this.linkType === 'LINKTYPE_ETHERNET'
+    isEthernet(): this is { payload: EthernetPacket } {
+        return this.payload instanceof EthernetPacket
     }
 
-    isNull(): this is NpcapDecode & { payload: NullPacket } {
-        return this.linkType === 'LINKTYPE_NULL'
+    isNull(): this is { payload: NullPacket } {
+        return this.payload instanceof NullPacket
     }
 
-    isRaw(): this is NpcapDecode & { payload: IPv4 } {
-        return this.linkType === 'LINKTYPE_RAW'
+    isIPv4(): this is { payload: IPv4 } {
+        return this.payload instanceof IPv4
     }
 
-    isSll(): this is NpcapDecode & { payload: SLLPacket } {
-        return this.linkType === 'LINKTYPE_LINUX_SLL'
+    isSLL(): this is { payload: SLLPacket } {
+        return this.payload instanceof SLLPacket
     }
 
     toString() {

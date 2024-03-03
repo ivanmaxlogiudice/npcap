@@ -43,12 +43,12 @@ export class NullPacket {
             emitter.emit(NullPacket.decoderName, this)
     }
 
-    isIPv4(): this is NullPacket & { payload: IPv4 } {
-        return this.type === 2
+    isIPv4(): this is { payload: IPv4 } {
+        return this.payload instanceof IPv4
     }
 
-    isIPv6(): this is NullPacket & { payload: IPv6 } {
-        return this.type !== undefined && [24, 28, 30].includes(this.type)
+    isIPv6(): this is { payload: IPv6 } {
+        return this.payload instanceof IPv6
     }
 
     toString() {

@@ -114,16 +114,16 @@ export class SLLPacket {
             emitter.emit(SLLPacket.decoderName, this)
     }
 
-    isIPv4(): this is SLLPacket & { payload: IPv4 } {
-        return this.type === PROTOCOL_IPV4
+    isIPv4(): this is { payload: IPv4 } {
+        return this.payload instanceof IPv4
     }
 
-    isArp(): this is SLLPacket & { payload: Arp } {
-        return this.type === PROTOCOL_ARP
+    isArp(): this is { payload: Arp } {
+        return this.payload instanceof Arp
     }
 
-    isIPv6(): this is SLLPacket & { payload: IPv6 } {
-        return this.type === PROTOCOL_IPV6
+    isIPv6(): this is { payload: IPv6 } {
+        return this.payload instanceof IPv6
     }
 
     toString() {
