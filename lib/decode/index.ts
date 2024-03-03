@@ -35,16 +35,16 @@ export class NpcapDecode {
 
         switch (this.linkType) {
             case 'LINKTYPE_ETHERNET':
-                this.payload = new EthernetPacket(this.emitter).decode(buffer) as any
+                this.payload = new EthernetPacket(this.emitter).decode(buffer)
                 break
             case 'LINKTYPE_NULL':
-                this.payload = new NullPacket(this.emitter).decode(buffer) as any
+                this.payload = new NullPacket(this.emitter).decode(buffer)
                 break
             case 'LINKTYPE_RAW':
-                this.payload = new IPv4(this.emitter).decode(buffer) as any
+                this.payload = new IPv4(this.emitter).decode(buffer)
                 break
             case 'LINKTYPE_LINUX_SLL':
-                this.payload = new SLLPacket(this.emitter).decode(buffer) as any
+                this.payload = new SLLPacket(this.emitter).decode(buffer)
                 break
             default:
                 console.log(`[NpcapPacket] Unknown decode link type '${this.linkType}'.`)
