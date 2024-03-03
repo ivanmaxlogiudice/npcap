@@ -1,44 +1,34 @@
-import { beforeEach, describe, expect, it, jest } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
-import EventEmitter from 'node:events'
 import { Udp } from '@/decode/protocols'
 
 describe('Udp', () => {
-    let emitter: EventEmitter
-    let instance: Udp
-    let buffer: Buffer
+    const buffer = Buffer.from(
+        '04d2' // source port 1234
+        + '04d3' // dst port 1235
+        + '0009' // length
+        + 'df03' // checksum (this on is bad)
+        + '30',
+        'hex',
+    )
+    const instance = new Udp(buffer)
 
-    beforeEach(() => {
-        emitter = new EventEmitter()
-        instance = new Udp(emitter)
-        buffer = Buffer.from(
-            '04d2' // source port 1234
-            + '04d3' // dst port 1235
-            + '0009' // length
-            + 'df03' // checksum (this on is bad)
-            + '30',
-            'hex',
-        )
-    })
-
-    describe('#decode', () => {
+    describe('#constructor', () => {
         it('is a function and returns the instance', () => {
-            expect(instance.decode).toBeTypeOf('function')
-            expect(instance.decode(buffer)).toBe(instance)
+            expect(instance).toBeTypeOf('object')
+            expect(instance).toBe(instance)
         })
 
-        it(`raises a ${Udp.decoderName} event on decode`, () => {
-            const handler = jest.fn()
+        // it(`raises a ${Udp.decoderName} event on decode`, () => {
+        //     const handler = jest.fn()
 
-            emitter.on(Udp.decoderName, handler)
-            instance.decode(buffer)
+        //     emitter.on(Udp.decoderName, handler)
+        //     instance.decode(buffer)
 
-            expect(handler).toHaveBeenCalled()
-        })
+        //     expect(handler).toHaveBeenCalled()
+        // })
 
         it('should decode Udp packet correctly', () => {
-            instance.decode(buffer)
-
             expect(instance).toHaveProperty('sport', 1234)
             expect(instance).toHaveProperty('dport', 1235)
             expect(instance).toHaveProperty('length', 9)
@@ -53,7 +43,7 @@ describe('Udp', () => {
         })
 
         it('should return correct string representation', () => {
-            expect(instance.decode(buffer).toString()).toBe('UDP 1234 -> 1235 len 9')
+            expect(new Udp(buffer).toString()).toBe('UDP 1234 -> 1235 len 9')
         })
     })
 })

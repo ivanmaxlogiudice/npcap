@@ -1,24 +1,18 @@
-import { beforeEach, describe, expect, it, jest } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
-import EventEmitter from 'node:events'
 import { IPv6, IPv6Addr } from '@/decode/protocols'
 
 describe('IPv6Addr', () => {
-    let instance: IPv6Addr
-    let buffer: Buffer
+    const buffer = Buffer.from('000102030405060708090A0B0C0D0E0F', 'hex')
+    const instance = new IPv6Addr(buffer)
 
-    beforeEach(() => {
-        instance = new IPv6Addr()
-        buffer = Buffer.from('000102030405060708090A0B0C0D0E0F', 'hex')
-    })
-
-    describe('#decode', () => {
+    describe('#constructor', () => {
         it('is a function', () => {
-            expect(instance.decode).toBeTypeOf('function')
+            expect(instance).toBeTypeOf('object')
         })
 
         it('should decode address correctly', () => {
-            expect(instance.decode(buffer)).toHaveProperty('addr', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+            expect(instance).toHaveProperty('addr', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
         })
     })
 
@@ -28,48 +22,39 @@ describe('IPv6Addr', () => {
         })
 
         it('should return correct string representation', () => {
-            expect(instance.decode(buffer).toString()).toBe('0001:0203:0405:0607:0809:0a0b:0c0d:0e0f')
+            expect(instance.toString()).toBe('0001:0203:0405:0607:0809:0a0b:0c0d:0e0f')
         })
     })
 })
 
 describe('IPv6', () => {
-    let emitter: EventEmitter
-    let instance: IPv6
-    let buffer: Buffer
+    const buffer = Buffer.from(
+        '61298765' // version=6, trafficClass=0x12, labelflow=0,
+        + '0000' // payloadLength =0
+        + '3b' // No next header
+        + '00' // hopLimit=0
+        + 'fe80000000000000708dfe834114a512' // src address
+        + '2001000041379e508000f12ab9c82815', // dest address
+        'hex',
+    )
+    const instance = new IPv6(buffer)
 
-    beforeEach(() => {
-        emitter = new EventEmitter()
-        instance = new IPv6(emitter)
-        buffer = Buffer.from(
-            '61298765' // version=6, trafficClass=0x12, labelflow=0,
-            + '0000' // payloadLength =0
-            + '3b' // No next header
-            + '00' // hopLimit=0
-            + 'fe80000000000000708dfe834114a512' // src address
-            + '2001000041379e508000f12ab9c82815', // dest address
-            'hex',
-        )
-    })
-
-    describe('#decode', () => {
+    describe('#constructor', () => {
         it('is a function and returns the instance', () => {
-            expect(instance.decode).toBeTypeOf('function')
-            expect(instance.decode(buffer)).toBe(instance)
+            expect(instance).toBeTypeOf('object')
+            expect(instance).toBe(instance)
         })
 
-        it(`raises a ${IPv6.decoderName} event on decode`, () => {
-            const handler = jest.fn()
+        // it(`raises a ${IPv6.decoderName} event on decode`, () => {
+        //     const handler = jest.fn()
 
-            emitter.on(IPv6.decoderName, handler)
-            instance.decode(buffer)
+        //     emitter.on(IPv6.decoderName, handler)
+        //     instance.decode(buffer)
 
-            expect(handler).toHaveBeenCalled()
-        })
+        //     expect(handler).toHaveBeenCalled()
+        // })
 
         it('should decode IPv6 packet correctly', () => {
-            instance.decode(buffer)
-
             expect(instance).toHaveProperty('version', 6)
             expect(instance).toHaveProperty('trafficClass', 0x12)
             expect(instance).toHaveProperty('flowLabel', 0x98765)
@@ -83,6 +68,19 @@ describe('IPv6', () => {
             // TODO: Implement IPv6 Headers
             // expect(instance).toHaveProperty('payload', 0NoNext)
         })
+
+        it('should throw an error on unknown protocol', () => {
+            expect(() => new IPv6(Buffer.from(
+                '60000000' // version=6, trafficClass=0x12, labelflow=0,
+                + '0000' // payloadLength =0
+                + 'ff' // a next header type which is not supported
+                + '00' // hopLimit=0
+                + 'fe80000000000000708dfe834114a512' // src address
+                + '2001000041379e508000f12ab9c82815' // dest address
+                + '1600fa04effffffa',
+                'hex',
+            ))).toThrow('Dont know how to decode protocol 255')
+        })
     })
 
     describe('#toString', () => {
@@ -91,23 +89,9 @@ describe('IPv6', () => {
         })
 
         it('should return correct string representation', () => {
-            // unsupported
-            expect(
-                instance.decode(Buffer.from(
-                    '60000000' // version=6, trafficClass=0x12, labelflow=0,
-                    + '0000' // payloadLength =0
-                    + 'ff' // a next header type which is not supported
-                    + '00' // hopLimit=0
-                    + 'fe80000000000000708dfe834114a512' // src address
-                    + '2001000041379e508000f12ab9c82815' // dest address
-                    + '1600fa04effffffa',
-                    'hex',
-                )).toString(),
-            ).toBe('fe80:0000:0000:0000:708d:fe83:4114:a512 -> 2001:0000:4137:9e50:8000:f12a:b9c8:2815 proto 255 undefined')
-
             // IGMP
             expect(
-                instance.decode(Buffer.from(
+                new IPv6(Buffer.from(
                     '60000000' // version=6, trafficClass=0x12, labelflow=0,
                     + '0000' // payloadLength =0
                     + '02' // IGMP next

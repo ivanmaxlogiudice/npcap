@@ -5,15 +5,13 @@ import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
 
 export class SLLAddr {
-    addr!: Array<number>
+    addr: Array<number>
 
-    decode(rawPacket: Buffer, offset: number, len: number) {
+    constructor(rawPacket: Buffer, offset: number, len: number) {
         this.addr = Array.from({ length: len })
 
         for (let i = 0; i < len; i++)
             this.addr[i] = rawPacket[offset + i]
-
-        return this
     }
 
     toString() {
@@ -37,49 +35,45 @@ export class SLLPacket {
      *
      * @see {@link https://www.tcpdump.org/linktypes/LINKTYPE_LINUX_SLL.html | Linux SLL}
      */
-    packetType?: number
+    packetType: number
 
     /**
      * Address type.
      *
      * @see {@link https://www.tcpdump.org/linktypes/LINKTYPE_LINUX_SLL.html | Linux SLL}
      */
-    addressType?: number
+    addressType: number
 
     /**
      * Address length
      *
      * @see {@link https://www.tcpdump.org/linktypes/LINKTYPE_LINUX_SLL.html | Linux SLL}
      */
-    addressLen?: number
+    addressLen: number
 
     /**
      * Source address.
      *
      * @see {@link https://www.tcpdump.org/linktypes/LINKTYPE_LINUX_SLL.html | Linux SLL}
      */
-    address?: SLLAddr
+    address: SLLAddr
 
     /**
      * Determine which protocol is encapsulated in the payload.
      *
      * @see {@link http://en.wikipedia.org/wiki/EtherType | EtherType}
      */
-    type?: number
+    type: number
 
     /**
      * The payload of the packet frame.
      *
      * Supported protocols: IPv4, Arp, IPv6.
      */
-    payload?: IPv4 | Arp | IPv6
-
-    constructor(
-        public emitter?: EventEmitter,
-    ) {}
+    payload: IPv4 | Arp | IPv6
 
     // https://www.tcpdump.org/linktypes/LINKTYPE_LINUX_SLL.html
-    decode(rawPacket: Buffer, offset: number = 0) {
+    constructor(rawPacket: Buffer, offset: number = 0, emitter?: EventEmitter) {
         this.packetType = rawPacket.readUInt16BE(offset)
         offset += 2
 
@@ -89,7 +83,7 @@ export class SLLPacket {
         this.addressLen = rawPacket.readUInt16BE(offset)
         offset += 2
 
-        this.address = new SLLAddr().decode(rawPacket, offset, this.addressLen)
+        this.address = new SLLAddr(rawPacket, offset, this.addressLen)
         offset += 8 // address uses 8 bytes in frame, but only address_len bytes are significant
 
         this.type = rawPacket.readUInt16BE(offset)
@@ -97,42 +91,39 @@ export class SLLPacket {
 
         if (this.type < 1536) {
             // this packet is actually some 802.3 type without an ethertype
-            this.type = 0
+            throw new Error(`802.3 type without an ethertype ${this.type}.`)
         }
         else {
             // http://en.wikipedia.org/wiki/EtherType
             switch (this.type) {
                 case PROTOCOL_IPV4:
-                    this.payload = new IPv4(this.emitter).decode(rawPacket, offset)
+                    this.payload = new IPv4(rawPacket, offset, emitter)
                     break
                 case PROTOCOL_ARP:
-                    this.payload = new Arp(this.emitter).decode(rawPacket, offset)
+                    this.payload = new Arp(rawPacket, offset, emitter)
                     break
                 case PROTOCOL_IPV6:
-                    this.payload = new IPv6(this.emitter).decode(rawPacket, offset)
+                    this.payload = new IPv6(rawPacket, offset, emitter)
                     break
                 default:
-                    this.payload = undefined
-                    console.log(`NpcapPacket: SLLPacket() - Dont know how to decode ethertype ${this.type}.`)
+                    throw new Error(`NpcapPacket: SLLPacket() - Dont know how to decode ethertype ${this.type}.`)
             }
         }
 
-        if (this.emitter)
-            this.emitter.emit(SLLPacket.decoderName, this)
-
-        return this
+        if (emitter)
+            emitter.emit(SLLPacket.decoderName, this)
     }
 
-    isIPv4(): this is SLLPacket & { payload: IPv4 } {
-        return this.type === PROTOCOL_IPV4
+    isIPv4(): this is { payload: IPv4 } {
+        return this.payload instanceof IPv4
     }
 
-    isArp(): this is SLLPacket & { payload: Arp } {
-        return this.type === PROTOCOL_ARP
+    isArp(): this is { payload: Arp } {
+        return this.payload instanceof Arp
     }
 
-    isIPv6(): this is SLLPacket & { payload: IPv6 } {
-        return this.type === PROTOCOL_IPV6
+    isIPv6(): this is { payload: IPv6 } {
+        return this.payload instanceof IPv6
     }
 
     toString() {

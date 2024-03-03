@@ -19,15 +19,11 @@ export class NpcapHeader {
 }
 
 export class NpcapDecode {
-    linkType?: LinkType
-    npcapHeader?: NpcapHeader
-    payload?: EthernetPacket | NullPacket | IPv4 | SLLPacket
+    linkType: LinkType
+    npcapHeader: NpcapHeader
+    payload: EthernetPacket | NullPacket | IPv4 | SLLPacket
 
-    constructor(
-        public emitter?: EventEmitter,
-    ) {}
-
-    decode(packet: PacketData) {
+    constructor(packet: PacketData, emitter?: EventEmitter) {
         this.linkType = packet.linkType
         this.npcapHeader = new NpcapHeader(packet.header)
 
@@ -35,38 +31,38 @@ export class NpcapDecode {
 
         switch (this.linkType) {
             case 'LINKTYPE_ETHERNET':
-                this.payload = new EthernetPacket(this.emitter).decode(buffer) as any
+                this.payload = new EthernetPacket(buffer, 0, emitter)
                 break
             case 'LINKTYPE_NULL':
-                this.payload = new NullPacket(this.emitter).decode(buffer) as any
+                this.payload = new NullPacket(buffer, 0, emitter)
                 break
             case 'LINKTYPE_RAW':
-                this.payload = new IPv4(this.emitter).decode(buffer) as any
+                this.payload = new IPv4(buffer, 0, emitter)
                 break
             case 'LINKTYPE_LINUX_SLL':
-                this.payload = new SLLPacket(this.emitter).decode(buffer) as any
+                this.payload = new SLLPacket(buffer, 0, emitter)
                 break
             default:
-                console.log(`[NpcapPacket] Unknown decode link type '${this.linkType}'.`)
+                throw new Error(`[NpcapPacket] Unknown decode link type '${this.linkType}'.`)
         }
 
         return this
     }
 
-    isEthernet(): this is NpcapDecode & { payload: EthernetPacket } {
-        return this.linkType === 'LINKTYPE_ETHERNET'
+    isEthernet(): this is { payload: EthernetPacket } {
+        return this.payload instanceof EthernetPacket
     }
 
-    isNull(): this is NpcapDecode & { payload: NullPacket } {
-        return this.linkType === 'LINKTYPE_NULL'
+    isNull(): this is { payload: NullPacket } {
+        return this.payload instanceof NullPacket
     }
 
-    isRaw(): this is NpcapDecode & { payload: IPv4 } {
-        return this.linkType === 'LINKTYPE_RAW'
+    isIPv4(): this is { payload: IPv4 } {
+        return this.payload instanceof IPv4
     }
 
-    isSll(): this is NpcapDecode & { payload: SLLPacket } {
-        return this.linkType === 'LINKTYPE_LINUX_SLL'
+    isSLL(): this is { payload: SLLPacket } {
+        return this.payload instanceof SLLPacket
     }
 
     toString() {
@@ -75,5 +71,5 @@ export class NpcapDecode {
 }
 
 export function decode(packet: PacketData, emitter?: EventEmitter) {
-    return new NpcapDecode(emitter).decode(packet)
+    return new NpcapDecode(packet, emitter)
 }

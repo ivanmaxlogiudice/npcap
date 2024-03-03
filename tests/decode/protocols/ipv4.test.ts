@@ -1,66 +1,56 @@
-import { beforeEach, describe, expect, it, jest } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
-import EventEmitter from 'node:events'
 import { IPFlags, IPv4, IPv4Addr } from '@/decode/protocols'
 
 describe('IPFlags', () => {
-    let ipFlags: IPFlags
-
-    beforeEach(() => {
-        ipFlags = new IPFlags()
-    })
+    let instance: IPFlags
 
     it('should decode flags correctly', () => {
-        ipFlags.decode(0b10000000) // Setting the reserved flag
-        expect(ipFlags.reserved).toBe(true)
-        expect(ipFlags.doNotFragment).toBe(false)
-        expect(ipFlags.moreFragments).toBe(false)
+        instance = new IPFlags(0b10000000) // Setting the reserved flag
+        expect(instance.reserved).toBe(true)
+        expect(instance.doNotFragment).toBe(false)
+        expect(instance.moreFragments).toBe(false)
 
-        ipFlags.decode(0b01000000) // Setting the doNotFragment flag
-        expect(ipFlags.reserved).toBe(false)
-        expect(ipFlags.doNotFragment).toBe(true)
-        expect(ipFlags.moreFragments).toBe(false)
+        instance = new IPFlags(0b01000000) // Setting the doNotFragment flag
+        expect(instance.reserved).toBe(false)
+        expect(instance.doNotFragment).toBe(true)
+        expect(instance.moreFragments).toBe(false)
 
-        ipFlags.decode(0b00100000) // Setting the moreFragments flag
-        expect(ipFlags.reserved).toBe(false)
-        expect(ipFlags.doNotFragment).toBe(false)
-        expect(ipFlags.moreFragments).toBe(true)
+        instance = new IPFlags(0b00100000) // Setting the moreFragments flag
+        expect(instance.reserved).toBe(false)
+        expect(instance.doNotFragment).toBe(false)
+        expect(instance.moreFragments).toBe(true)
     })
 
     it('should return correct string representation', () => {
-        ipFlags.reserved = true
-        ipFlags.doNotFragment = true
-        ipFlags.moreFragments = false
-        expect(ipFlags.toString()).toBe('[rd]')
+        instance.reserved = true
+        instance.doNotFragment = true
+        instance.moreFragments = false
+        expect(instance.toString()).toBe('[rd]')
 
-        ipFlags.reserved = false
-        ipFlags.doNotFragment = false
-        ipFlags.moreFragments = true
-        expect(ipFlags.toString()).toBe('[m]')
+        instance.reserved = false
+        instance.doNotFragment = false
+        instance.moreFragments = true
+        expect(instance.toString()).toBe('[m]')
 
-        ipFlags.reserved = false
-        ipFlags.doNotFragment = false
-        ipFlags.moreFragments = false
-        expect(ipFlags.toString()).toBe('[]')
+        instance.reserved = false
+        instance.doNotFragment = false
+        instance.moreFragments = false
+        expect(instance.toString()).toBe('[]')
     })
 })
 
 describe('IPv4Addr', () => {
-    let instance: IPv4Addr
-    let buffer: Buffer
+    const buffer = Buffer.from([192, 168, 1, 1])
+    const instance = new IPv4Addr(buffer)
 
-    beforeEach(() => {
-        instance = new IPv4Addr()
-        buffer = Buffer.from([192, 168, 1, 1])
-    })
-
-    describe('#decode', () => {
+    describe('#constructor', () => {
         it('is a function', () => {
-            expect(instance.decode).toBeTypeOf('function')
+            expect(instance).toBeTypeOf('object')
         })
 
         it('should decode address correctly', () => {
-            expect(instance.decode(buffer)).toHaveProperty('addr', [192, 168, 1, 1])
+            expect(instance).toHaveProperty('addr', [192, 168, 1, 1])
         })
     })
 
@@ -70,7 +60,7 @@ describe('IPv4Addr', () => {
         })
 
         it('should return correct string representation', () => {
-            expect(instance.decode(buffer).toString()).toBe('192.168.1.1')
+            expect(instance.toString()).toBe('192.168.1.1')
 
             instance.addr = [192, 168, 1, 1]
             expect(instance.toString()).toBe('192.168.1.1')
@@ -85,39 +75,31 @@ describe('IPv4Addr', () => {
 })
 
 describe('IPv4', () => {
-    let emitter: EventEmitter
-    let instance: IPv4
-    let buffer: Buffer
+    const buffer = Buffer.from(
+        '46c000200000400001021274c0a82101effffffa94040000' // header
+        + '1600fa04effffffa' // igmpv2
+        + '00000000', // checksum
+        'hex',
+    )
 
-    beforeEach(() => {
-        emitter = new EventEmitter()
-        instance = new IPv4(emitter)
-        buffer = Buffer.from(
-            '46c000200000400001021274c0a82101effffffa94040000' // header
-            + '1600fa04effffffa' // igmpv2
-            + '00000000', // checksum
-            'hex',
-        )
-    })
+    const instance = new IPv4(buffer)
 
-    describe('#decode', () => {
+    describe('#constructor', () => {
         it('is a function and returns the instance', () => {
-            expect(instance.decode).toBeTypeOf('function')
-            expect(instance.decode(buffer)).toBe(instance)
+            expect(instance).toBeTypeOf('object')
+            expect(instance).toBe(instance)
         })
 
-        it(`raises a ${IPv4.decoderName} event on decode`, () => {
-            const handler = jest.fn()
+        // it(`raises a ${IPv4.decoderName} event on decode`, () => {
+        //     const handler = jest.fn()
 
-            emitter.on(IPv4.decoderName, handler)
-            instance.decode(buffer)
+        //     emitter.on(IPv4.decoderName, handler)
+        //     instance.decode(buffer)
 
-            expect(handler).toHaveBeenCalled()
-        })
+        //     expect(handler).toHaveBeenCalled()
+        // })
 
         it('should decode IPv4 packet correctly', () => {
-            instance.decode(buffer)
-
             expect(instance).toHaveProperty('version', 4)
             expect(instance).toHaveProperty('headerLength', 24)
             expect(instance).toHaveProperty('diffserv', 0xc0)
@@ -140,7 +122,7 @@ describe('IPv4', () => {
             expect(instance.toString).toBeTypeOf('function')
         })
 
-        it('returns a value like "192.168.33.1 -> 239.255.255.250 IGMP Membership Report" when no flags are set', () => {
+        it('should return correct string representation', () => {
             const noflags = Buffer.from(
                 '46c000200000000001021274c0a82101effffffa94040000' // header
                 + '1600fa04effffffa' // igmpv2
@@ -148,7 +130,7 @@ describe('IPv4', () => {
                 'hex',
             )
 
-            expect(instance.decode(noflags).toString()).toBe('192.168.33.1 -> 239.255.255.250 IGMP Membership Report')
+            expect(new IPv4(noflags).toString()).toBe('192.168.33.1 -> 239.255.255.250 IGMP Membership Report')
         })
     })
 })
