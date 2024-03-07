@@ -1,6 +1,4 @@
 import type { LiveSessionOptions, OfflineSessionOptions } from './types'
-import { decode } from './decode'
-import { npcap } from './npcap'
 import { NpcapSession } from './session'
 
 /**
@@ -25,4 +23,7 @@ export function createOfflineSession(path: string, options: OfflineSessionOption
     return new NpcapSession(false, path, options)
 }
 
-export { decode, npcap }
+export * from './decode'
+export * from './npcap'
+export * from './session'
+export * from './types'
