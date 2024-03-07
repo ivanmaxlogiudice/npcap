@@ -1,5 +1,5 @@
 {
-    "name": "npcap",
+    "name": "node-npcap",
     "version": "0.0.1",
     "packageManager": "pnpm@8.15.4",
     "description": "Native addon to capture & decode network packets.",

@@ -1,7 +1,7 @@
 {
     "targets": [
         {
-            "target_name": "npcap",
+            "target_name": "node-npcap",
             "sources": [
                 "lib/common.cpp",
                 "lib/binding.cpp", 
