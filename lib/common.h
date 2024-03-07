@@ -1,7 +1,7 @@
 #ifndef NAPI_COMMON_H
 #define NAPI_COMMON_H
 
-#include <pcap.h>
+#include <pcap/pcap.h>
 #include <string.h>
 #include <node_api.h>
 
