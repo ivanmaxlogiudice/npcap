@@ -32,7 +32,7 @@
         }
     },
     "scripts": {
-        "preRebuild": "node-gyp rebuild",
+        "preRebuild": "node-gyp rebuild -j max",
         "test": "vitest",
         "coverage": "vitest run --coverage",
         "typecheck": "tsc --noEmit",
@@ -41,7 +41,7 @@
         "dev": "esno lib/index.ts",
         "stub": "unbuild --stub",
         "build": "pnpm build:src && pnpm build:lib",
-        "build:lib": "node-gyp rebuild",
+        "build:lib": "node-gyp rebuild -j max",
         "build:src": "unbuild",
         "prepublishOnly": "pnpm run build",
         "release": "bumpp && pnpm publish",
