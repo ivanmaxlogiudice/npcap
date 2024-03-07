@@ -17,6 +17,7 @@
     "files": [
         "*.d.ts",
         "binding.gyp",
+        "deps",
         "dist",
         "lib"
     ],
