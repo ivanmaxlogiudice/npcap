@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
+import { describe, expect, it } from 'vitest'
 import { IPFlags, IPv4, IPv4Addr } from '@/decode/protocols'
 
-describe('IPFlags', () => {
+describe('iPFlags', () => {
     let instance: IPFlags
 
     it('should decode flags correctly', () => {
@@ -40,7 +40,7 @@ describe('IPFlags', () => {
     })
 })
 
-describe('IPv4Addr', () => {
+describe('iPv4Addr', () => {
     const buffer = Buffer.from([192, 168, 1, 1])
     const instance = new IPv4Addr(buffer)
 
@@ -74,7 +74,7 @@ describe('IPv4Addr', () => {
     })
 })
 
-describe('IPv4', () => {
+describe('iPv4', () => {
     const buffer = Buffer.from(
         '46c000200000400001021274c0a82101effffffa94040000' // header
         + '1600fa04effffffa' // igmpv2

@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
+import { describe, expect, it } from 'vitest'
 import { ICMP } from '@/decode/protocols'
 import { int8_to_hex } from '@/decode/utils'
 
-describe('ICMP', () => {
+describe('iCMP', () => {
     const buffer = Buffer.from('01020304', 'hex')
     let instance = new ICMP(buffer)
 

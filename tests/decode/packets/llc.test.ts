@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
+import { describe, expect, it } from 'vitest'
 import { LLCPacket } from '@/decode/packets'
 import { IPv4 } from '@/decode/protocols'
 
-describe('LLCPacket', () => {
+describe('lLCPacket', () => {
     const buffer = Buffer.from(
         'aaaa030000000800' // LLC frame
         + '46c000200000400001021274c0a82101effffffa94040000' // ipv4 payload

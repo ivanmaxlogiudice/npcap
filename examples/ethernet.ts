@@ -1,4 +1,4 @@
-import { createSession, decode } from '../lib'
+import { createSession, decode } from '../src'
 
 // On empty device will try to get default device.
 const session = createSession('', { filter: 'tcp' })

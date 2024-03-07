@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
+import { describe, expect, it } from 'vitest'
 import { Udp } from '@/decode/protocols'
 
-describe('Udp', () => {
+describe('udp', () => {
     const buffer = Buffer.from(
         '04d2' // source port 1234
         + '04d3' // dst port 1235

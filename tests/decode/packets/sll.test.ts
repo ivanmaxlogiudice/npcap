@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { SLLPacket } from '@/decode/packets'
 
-describe('SLLPacket', () => {
+describe('sLLPacket', () => {
     let instance: SLLPacket
 
     // TODO: Add missing test

@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
+import { describe, expect, it } from 'vitest'
 import { IPv6, IPv6Addr } from '@/decode/protocols'
 
-describe('IPv6Addr', () => {
+describe('iPv6Addr', () => {
     const buffer = Buffer.from('000102030405060708090A0B0C0D0E0F', 'hex')
     const instance = new IPv6Addr(buffer)
 
@@ -27,7 +27,7 @@ describe('IPv6Addr', () => {
     })
 })
 
-describe('IPv6', () => {
+describe('iPv6', () => {
     const buffer = Buffer.from(
         '61298765' // version=6, trafficClass=0x12, labelflow=0,
         + '0000' // payloadLength =0

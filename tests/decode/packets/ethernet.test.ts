@@ -1,10 +1,10 @@
-import { describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
+import { describe, expect, it } from 'vitest'
 import { EthernetAddr, EthernetPacket } from '@/decode/packets'
 import { IPv4 } from '@/decode/protocols'
 import { PROTOCOL_IPV4 } from '@/types'
 
-describe('EthernetAddr', () => {
+describe('ethernetAddr', () => {
     const instance = new EthernetAddr(Buffer.from('010203040506', 'hex'))
 
     describe('constructor', () => {
@@ -29,7 +29,7 @@ describe('EthernetAddr', () => {
     })
 })
 
-describe('EthernetPacket', () => {
+describe('ethernetPacket', () => {
     let instance: EthernetPacket
     const bufferIPv4WithoutVLAN = Buffer.from(
         'e8ada60b3fd4' // dhost

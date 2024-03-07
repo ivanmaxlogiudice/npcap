@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
+import { describe, expect, it } from 'vitest'
 import { Arp } from '@/decode/protocols'
 
-describe('ARP', () => {
+describe('aRP', () => {
     const buffer = Buffer.from(
         '0001'
         + '0800060400010007'

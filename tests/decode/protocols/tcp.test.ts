@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
+import { describe, expect, it } from 'vitest'
 import { Tcp } from '@/decode/protocols'
 
-describe('Tcp', () => {
+describe('tcp', () => {
     const buffer = Buffer.from('b5dd00500aaf604e0000000060c2102044b2000002040218', 'hex')
     let instance = new Tcp(buffer)
 

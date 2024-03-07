@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
+import { describe, expect, it } from 'vitest'
 import { NullPacket } from '@/decode/packets'
 import { IPv4, IPv6 } from '@/decode/protocols'
 
-describe('NullPacket', () => {
+describe('nullPacket', () => {
     let instance: NullPacket
 
     describe('#constructor', () => {

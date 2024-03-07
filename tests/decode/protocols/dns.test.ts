@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
+import { describe, expect, it } from 'vitest'
 import { DNS } from '@/decode/protocols'
 
-describe('DNS', () => {
+describe('dNS', () => {
     const buffer = Buffer.from(
         '311f' // transaction id
         + '0100' // flags

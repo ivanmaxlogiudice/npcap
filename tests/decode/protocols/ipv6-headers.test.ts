@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'bun:test'
 import { Buffer } from 'node:buffer'
+import { describe, expect, it } from 'vitest'
 import { HeaderExtension, NoNext } from '@/decode/protocols'
 
-describe('NoNext', () => {
+describe('noNext', () => {
     const buffer = Buffer.from('', 'hex')
     const instance = new NoNext(buffer)
 
@@ -28,7 +28,7 @@ describe('NoNext', () => {
     })
 })
 
-describe('HeaderExtension', () => {
+describe('headerExtension', () => {
     const buffer = Buffer.from(
         '3B' // No next will be the next header
         + '01' // the length of the the header in 8 byte units - 8bytes
