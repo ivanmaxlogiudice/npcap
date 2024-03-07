@@ -24,11 +24,11 @@
                         ],
                     },
                     'msvs_settings': {
-                    'VCLinkerTool': {
-                        'DelayLoadDLLs': [ '<(node_host_binary)<(EXECUTABLE_SUFFIX)','wpcap.dll' ],
-                        # Don't print a linker warning when no imports from either .exe
-                        # are used.
-                        'AdditionalOptions': [ '/ignore:4199' ],
+                        'VCLinkerTool': {
+                            'DelayLoadDLLs': [ '<(node_host_binary)<(EXECUTABLE_SUFFIX)','wpcap.dll' ],
+                            # Don't print a linker warning when no imports from either .exe
+                            # are used.
+                            'AdditionalOptions': [ '/ignore:4199' ],
                         },
                     },
                 }, {
