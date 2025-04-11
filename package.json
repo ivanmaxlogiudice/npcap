@@ -1,7 +1,7 @@
 {
     "name": "node-npcap",
     "version": "0.0.2-beta.5",
-    "packageManager": "pnpm@8.15.4",
+    "packageManager": "pnpm@8.15.9",
     "description": "Native addon to capture & decode network packets.",
     "type": "module",
     "license": "MIT",
@@ -48,21 +48,21 @@
         "configure": "node-gyp configure"
     },
     "devDependencies": {
-        "@ivanmaxlogiudice/eslint-config": "^1.0.26",
-        "@types/node": "^20.11.25",
-        "@vitest/coverage-v8": "^1.3.1",
-        "bumpp": "^9.4.0",
-        "eslint": "^8.57.0",
-        "esno": "^4.7.0",
-        "lint-staged": "^15.2.2",
-        "rimraf": "^5.0.5",
-        "simple-git-hooks": "^2.10.0",
-        "typescript": "^5.4.2",
+        "@ivanmaxlogiudice/eslint-config": "^1.0.31",
+        "@types/node": "^20.17.30",
+        "@vitest/coverage-v8": "^1.6.1",
+        "bumpp": "^9.11.1",
+        "eslint": "^8.57.1",
+        "esno": "^4.8.0",
+        "lint-staged": "^15.5.1",
+        "rimraf": "^5.0.10",
+        "simple-git-hooks": "^2.12.1",
+        "typescript": "^5.8.3",
         "unbuild": "^2.0.0",
         "vitest": "^1.3.1"
     },
     "engines": {
-        "node": ">=20.11.1"
+        "node": ">=20.19.0"
     },
     "simple-git-hooks": {
         "pre-commit": "pnpm lint-staged"
