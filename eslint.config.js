@@ -1,19 +1,10 @@
-import config from '@ivanmaxlogiudice/eslint-config'
+import { config } from '@ivanmaxlogiudice/eslint-config'
 
-export default config(
-    {},
-    {
-        files: ['.vscode/*'],
-        rules: {
-            'unicorn/filename-case': 'off',
-        },
+export default config({
+    typescript: true,
+}, {
+    rules: {
+        'no-console': 'off',
+        'antfu/if-newline': 'off',
     },
-    {
-        rules: {
-            'no-console': 'off',
-            'unicorn/filename-case': 'off',
-            'antfu/if-newline': 'off',
-            'perfectionist/sort-classes': 'off',
-        },
-    },
-)
+})
