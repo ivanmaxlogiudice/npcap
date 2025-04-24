@@ -1,6 +1,6 @@
-import { DNS } from './dns'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
+import { DNS } from './dns'
 
 export class Udp {
     static decoderName = 'udp'

@@ -1,8 +1,8 @@
 import type { LinkType, PacketData } from '@/types'
-import { EthernetPacket, NullPacket, SLLPacket } from './packets'
-import { IPv4 } from './protocols'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
+import { EthernetPacket, NullPacket, SLLPacket } from './packets'
+import { IPv4 } from './protocols'
 
 export class NpcapHeader {
     caplen: number

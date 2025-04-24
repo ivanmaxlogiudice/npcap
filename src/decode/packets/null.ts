@@ -1,6 +1,6 @@
-import { IPv4, IPv6 } from '../protocols'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
+import { IPv4, IPv6 } from '../protocols'
 
 export class NullPacket {
     static decoderName = 'null-packet'

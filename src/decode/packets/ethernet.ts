@@ -1,8 +1,8 @@
 import { int8_to_hex as hex } from '@/decode/utils'
 import { PROTOCOL_ARP, PROTOCOL_IPV4, PROTOCOL_IPV6, PROTOCOL_VLAN, ProtocolName } from '@/types'
-import { Arp, IPv4, IPv6, Vlan } from '../protocols'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
+import { Arp, IPv4, IPv6, Vlan } from '../protocols'
 
 export class EthernetAddr {
     addr: number[] = Array.from({ length: 4 })

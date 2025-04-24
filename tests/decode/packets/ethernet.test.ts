@@ -1,8 +1,8 @@
 import { Buffer } from 'node:buffer'
-import { describe, expect, it } from 'vitest'
 import { EthernetAddr, EthernetPacket } from '@/decode/packets'
 import { IPv4 } from '@/decode/protocols'
 import { PROTOCOL_IPV4 } from '@/types'
+import { describe, expect, it } from 'vitest'
 
 describe('ethernetAddr', () => {
     const instance = new EthernetAddr(Buffer.from('010203040506', 'hex'))

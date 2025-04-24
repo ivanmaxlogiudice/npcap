@@ -1,7 +1,7 @@
-import { EthernetAddr } from '../packets/ethernet'
-import { IPv4Addr } from './ipv4'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
+import { EthernetAddr } from '../packets/ethernet'
+import { IPv4Addr } from './ipv4'
 
 export class Arp {
     static decoderName = 'arp'

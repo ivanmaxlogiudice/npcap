@@ -1,8 +1,8 @@
 import { Buffer } from 'node:buffer'
-import type { Session } from './npcap'
-import type { LinkType, LiveSessionOptions, PacketData } from './types'
 import { TypedEventEmitter } from './emitter'
 import { npcap } from './npcap'
+import type { Session } from './npcap'
+import type { LinkType, LiveSessionOptions, PacketData } from './types'
 
 export class NpcapSession extends TypedEventEmitter<{
     packet: [packet: PacketData]

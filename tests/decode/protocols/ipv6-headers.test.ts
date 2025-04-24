@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer'
-import { describe, expect, it } from 'vitest'
 import { HeaderExtension, NoNext } from '@/decode/protocols'
+import { describe, expect, it } from 'vitest'
 
 describe('noNext', () => {
     const buffer = Buffer.from('', 'hex')

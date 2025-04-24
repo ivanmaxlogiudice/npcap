@@ -1,6 +1,6 @@
-import { IPv4Addr } from './ipv4'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
+import { IPv4Addr } from './ipv4'
 
 const typeVersion: Record<number, number> = {
     0x11: 3,

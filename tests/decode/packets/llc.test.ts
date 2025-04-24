@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer'
-import { describe, expect, it } from 'vitest'
 import { LLCPacket } from '@/decode/packets'
 import { IPv4 } from '@/decode/protocols'
+import { describe, expect, it } from 'vitest'
 
 describe('lLCPacket', () => {
     const buffer = Buffer.from(
@@ -29,8 +29,8 @@ describe('lLCPacket', () => {
         // })
 
         it('should decode packet', () => {
-            expect(instance).toHaveProperty('dsap', 0xaa)
-            expect(instance).toHaveProperty('ssap', 0xaa)
+            expect(instance).toHaveProperty('dsap', 0xAA)
+            expect(instance).toHaveProperty('ssap', 0xAA)
             expect(instance).toHaveProperty('control', 0x03)
             expect(instance).toHaveProperty('type', 2048)
             expect(instance.payload).toBeInstanceOf(IPv4)

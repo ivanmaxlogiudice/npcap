@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer'
-import { describe, expect, it } from 'vitest'
 import { IPFlags, IPv4, IPv4Addr } from '@/decode/protocols'
+import { describe, expect, it } from 'vitest'
 
 describe('iPFlags', () => {
     let instance: IPFlags
@@ -102,7 +102,7 @@ describe('iPv4', () => {
         it('should decode IPv4 packet correctly', () => {
             expect(instance).toHaveProperty('version', 4)
             expect(instance).toHaveProperty('headerLength', 24)
-            expect(instance).toHaveProperty('diffserv', 0xc0)
+            expect(instance).toHaveProperty('diffserv', 0xC0)
 
             expect(instance.flags?.reserved).toBe(false)
             expect(instance.flags?.doNotFragment).toBe(true)

@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer'
-import { describe, expect, it } from 'vitest'
 import { ICMP } from '@/decode/protocols'
 import { int8_to_hex } from '@/decode/utils'
+import { describe, expect, it } from 'vitest'
 
 describe('iCMP', () => {
     const buffer = Buffer.from('01020304', 'hex')

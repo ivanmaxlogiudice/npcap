@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer'
-import { describe, expect, it } from 'vitest'
 import { Arp } from '@/decode/protocols'
+import { describe, expect, it } from 'vitest'
 
 describe('aRP', () => {
     const buffer = Buffer.from(
@@ -26,7 +26,7 @@ describe('aRP', () => {
             expect(instance).toHaveProperty('plen', 4)
             expect(instance).toHaveProperty('operation', 1)
 
-            expect(instance).toHaveProperty('sha.addr', [0x00, 0x07, 0x0d, 0xaf, 0xf4, 0x54])
+            expect(instance).toHaveProperty('sha.addr', [0x00, 0x07, 0x0D, 0xAF, 0xF4, 0x54])
             expect(instance).toHaveProperty('spa.addr', [69, 76, 216, 1])
             expect(instance).toHaveProperty('tha.addr', [0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
             expect(instance).toHaveProperty('tpa.addr', [69, 76, 223, 213])

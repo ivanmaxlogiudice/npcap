@@ -1,6 +1,6 @@
 import { createRequire } from 'node:module'
-import type { CaptureStats, Device, LinkType } from './types'
 import type { Buffer } from 'node:buffer'
+import type { CaptureStats, Device, LinkType } from './types'
 
 const require = createRequire(import.meta.url)
 const addon = require('../build/Release/npcap.node')

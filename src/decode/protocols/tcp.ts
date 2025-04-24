@@ -200,7 +200,7 @@ export class Tcp {
         offset += 4
 
         // The first 4 bits of the next header * 4 tells use the length of the header.
-        this.headerLength = (rawPacket[offset] & 0xf0) >> 2
+        this.headerLength = (rawPacket[offset] & 0xF0) >> 2
 
         this.flags = new TCPFlags(rawPacket[offset], rawPacket[offset + 1])
         offset += 2

@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { SLLPacket } from '@/decode/packets'
+import { describe, expect, it } from 'vitest'
 
 describe('sLLPacket', () => {
     let instance: SLLPacket

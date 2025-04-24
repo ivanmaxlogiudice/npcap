@@ -1,6 +1,6 @@
-import { HeaderExtension, ICMP, IGMP, IPv4, IPv6, NoNext, Tcp, Udp } from './protocols'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
+import { HeaderExtension, ICMP, IGMP, IPv4, IPv6, NoNext, Tcp, Udp } from './protocols'
 
 export type ProtocolsType =
     | HeaderExtension

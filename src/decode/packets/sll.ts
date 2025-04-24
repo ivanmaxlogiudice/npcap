@@ -1,8 +1,8 @@
 import { PROTOCOL_ARP, PROTOCOL_IPV4, PROTOCOL_IPV6, ProtocolName } from '@/types'
-import { Arp, IPv4, IPv6 } from '../protocols'
-import { int8_to_hex } from '../utils'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
+import { Arp, IPv4, IPv6 } from '../protocols'
+import { int8_to_hex } from '../utils'
 
 export class SLLAddr {
     addr: Array<number>

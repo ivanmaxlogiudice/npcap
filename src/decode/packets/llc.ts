@@ -1,9 +1,9 @@
 import { PROTOCOL_ARP, PROTOCOL_IPV4, PROTOCOL_IPV6, ProtocolName } from '@/types'
-import { Arp, IPv4, IPv6 } from '../protocols'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
+import { Arp, IPv4, IPv6 } from '../protocols'
 
-const SNAP = 0xaa
+const SNAP = 0xAA
 const LSAP = 0x00
 
 export class LLCPacket {

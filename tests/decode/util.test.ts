@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { int8_to_dec, int8_to_hex, int8_to_hex_nopad } from '@/decode/utils'
+import { describe, expect, it } from 'vitest'
 
 describe('util', () => {
     describe('int8_to_hex', () => {

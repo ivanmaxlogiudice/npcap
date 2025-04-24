@@ -1,9 +1,9 @@
-import type { ProtocolsType } from '../ip-protocols'
+import type { Buffer } from 'node:buffer'
+import type EventEmitter from 'node:events'
 import { HeaderExtension, ICMP, IGMP, IPv6, NoNext, Tcp, Udp } from '.'
 import { protocols } from '../ip-protocols'
 import { int8_to_dec } from '../utils'
-import type { Buffer } from 'node:buffer'
-import type EventEmitter from 'node:events'
+import type { ProtocolsType } from '../ip-protocols'
 
 export class IPFlags {
     reserved: boolean
@@ -151,8 +151,8 @@ export class IPv4 {
     constructor(rawPacket: Buffer, offset: number = 0, emitter?: EventEmitter) {
         const originalOffset = offset
 
-        this.version = (rawPacket[offset] & 0xf0) >> 4
-        this.headerLength = (rawPacket[offset] & 0x0f) << 2
+        this.version = (rawPacket[offset] & 0xF0) >> 4
+        this.headerLength = (rawPacket[offset] & 0x0F) << 2
         offset += 1
 
         this.diffserv = rawPacket[offset]
@@ -166,7 +166,7 @@ export class IPv4 {
 
         this.flags = new IPFlags(rawPacket[offset])
         // flags only uses the top 3 bits of offset so don't advance yet
-        this.fragmentOffset = ((rawPacket.readUInt16BE(offset) & 0x1fff) << 3) // 13-bits from 6, 7
+        this.fragmentOffset = ((rawPacket.readUInt16BE(offset) & 0x1FFF) << 3) // 13-bits from 6, 7
         offset += 2
 
         this.ttl = rawPacket[offset]

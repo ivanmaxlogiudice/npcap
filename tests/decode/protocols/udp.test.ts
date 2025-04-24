@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer'
-import { describe, expect, it } from 'vitest'
 import { Udp } from '@/decode/protocols'
+import { describe, expect, it } from 'vitest'
 
 describe('udp', () => {
     const buffer = Buffer.from(
@@ -33,7 +33,7 @@ describe('udp', () => {
             expect(instance).toHaveProperty('dport', 1235)
             expect(instance).toHaveProperty('length', 9)
             expect(instance).toHaveProperty('data', Buffer.from('30', 'hex'))
-            expect(instance).toHaveProperty('checksum', 0xdf03)
+            expect(instance).toHaveProperty('checksum', 0xDF03)
         })
     })
 

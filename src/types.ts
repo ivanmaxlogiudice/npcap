@@ -157,7 +157,7 @@ export interface OfflineSessionOptions extends CommonSessionOptions {
 export const PROTOCOL_IPV4 = 0x800
 export const PROTOCOL_ARP = 0x806
 export const PROTOCOL_VLAN = 0x8100
-export const PROTOCOL_IPV6 = 0x86dd
+export const PROTOCOL_IPV6 = 0x86DD
 
 export const ProtocolName: Record<number, string> = {
     [PROTOCOL_IPV4]: 'IPv4',

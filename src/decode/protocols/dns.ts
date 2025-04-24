@@ -1,7 +1,7 @@
-import { IPv4Addr } from './ipv4'
-import { IPv6Addr } from './ipv6'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
+import { IPv4Addr } from './ipv4'
+import { IPv6Addr } from './ipv6'
 
 const DnsRrTypes: Record<number, string> = {
     0: 'Unknown (0)',

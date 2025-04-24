@@ -1,8 +1,8 @@
-import type { ProtocolsType } from '../ip-protocols'
-import { ICMP, IGMP, IPv4, IPv6, Tcp, Udp } from '.'
-import { protocols } from '../ip-protocols'
 import type { Buffer } from 'node:buffer'
 import type EventEmitter from 'node:events'
+import { ICMP, IGMP, IPv4, IPv6, Tcp, Udp } from '.'
+import { protocols } from '../ip-protocols'
+import type { ProtocolsType } from '../ip-protocols'
 
 export class NoNext {
     constructor(rawPacket: Buffer, offset: number = 0) {

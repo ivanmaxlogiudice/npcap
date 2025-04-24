@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer'
-import { describe, expect, it } from 'vitest'
 import { DNS } from '@/decode/protocols'
+import { describe, expect, it } from 'vitest'
 
 describe('dNS', () => {
     const buffer = Buffer.from(
@@ -24,7 +24,7 @@ describe('dNS', () => {
         })
 
         it('should decode DNS packet correctly', () => {
-            expect(instance).toHaveProperty('id', 0x311f)
+            expect(instance).toHaveProperty('id', 0x311F)
 
             expect(instance).toHaveProperty('header.isResponse', false)
             expect(instance).toHaveProperty('header.opcode', 0)

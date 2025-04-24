@@ -1,5 +1,5 @@
-import type { LiveSessionOptions, OfflineSessionOptions } from './types'
 import { NpcapSession } from './session'
+import type { LiveSessionOptions, OfflineSessionOptions } from './types'
 
 /**
  * Create a live capture session on the specified device

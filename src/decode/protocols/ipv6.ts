@@ -1,9 +1,9 @@
-import type { ProtocolsType } from '../ip-protocols'
+import type { Buffer } from 'node:buffer'
+import type EventEmitter from 'node:events'
 import { HeaderExtension, ICMP, IGMP, IPv4, NoNext, Tcp, Udp } from '.'
 import { protocols } from '../ip-protocols'
 import { int8_to_hex as hex } from '../utils'
-import type { Buffer } from 'node:buffer'
-import type EventEmitter from 'node:events'
+import type { ProtocolsType } from '../ip-protocols'
 
 export class IPv6Addr {
     addr = Array.from<number>({ length: 16 })
@@ -29,9 +29,9 @@ export class IPv6Addr {
 
     toString() {
         return `${hex[this.addr[0]] + hex[this.addr[1]]}:${hex[this.addr[2]]}${hex[this.addr[3]]}:${
-           hex[this.addr[4]]}${hex[this.addr[5]]}:${hex[this.addr[6]]}${hex[this.addr[7]]}:${
-           hex[this.addr[8]]}${hex[this.addr[9]]}:${hex[this.addr[10]]}${hex[this.addr[11]]}:${
-           hex[this.addr[12]]}${hex[this.addr[13]]}:${hex[this.addr[14]]}${hex[this.addr[15]]}`
+            hex[this.addr[4]]}${hex[this.addr[5]]}:${hex[this.addr[6]]}${hex[this.addr[7]]}:${
+            hex[this.addr[8]]}${hex[this.addr[9]]}:${hex[this.addr[10]]}${hex[this.addr[11]]}:${
+            hex[this.addr[12]]}${hex[this.addr[13]]}:${hex[this.addr[14]]}${hex[this.addr[15]]}`
     }
 }
 
@@ -107,9 +107,9 @@ export class IPv6 {
     constructor(rawPacket: Buffer, offset: number = 0, emitter?: EventEmitter) {
         const originalOffset = offset
 
-        this.version = ((rawPacket[offset] & 0xf0) >> 4) // first 4 bits
-        this.trafficClass = ((rawPacket[offset] & 0x0f) << 4) | ((rawPacket[offset + 1] & 0xf0) >> 4)
-        this.flowLabel = ((rawPacket[offset + 1] & 0x0f) << 16) + (rawPacket[offset + 2] << 8) + rawPacket[offset + 3]
+        this.version = ((rawPacket[offset] & 0xF0) >> 4) // first 4 bits
+        this.trafficClass = ((rawPacket[offset] & 0x0F) << 4) | ((rawPacket[offset + 1] & 0xF0) >> 4)
+        this.flowLabel = ((rawPacket[offset + 1] & 0x0F) << 16) + (rawPacket[offset + 2] << 8) + rawPacket[offset + 3]
 
         this.payloadLength = rawPacket.readUInt16BE(offset + 4)
 
