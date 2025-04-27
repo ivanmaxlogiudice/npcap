@@ -153,6 +153,10 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
     ASSERT_CALL(env, napi_typeof(env, argv[11], &type));
     ASSERT_MESSAGE(env, type == napi_boolean, "The argument `promiscuous` must be a Boolean.");
 
+    // argv[12]: { minBytes: number }
+    ASSERT_CALL(env, napi_typeof(env, argv[12], &type));
+    ASSERT_MESSAGE(env, type == napi_number, "The argument `minBytes` must be a Number.");
+
     // Unwrap the `this` object to get the Session pointer.
     Session* session;
     ASSERT_CALL(env, napi_unwrap(env, thisArg, reinterpret_cast<void**>(&session)));
@@ -171,6 +175,7 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
     auto snapLen = GetNumberFromArg(env, argv[6]);
     auto outFile = GetStringFromArg(env, argv[7]);
     auto timeout = GetNumberFromArg(env, argv[9]);
+    auto minBytes = GetNumberFromArg(env, argv[12]);
 
     char errorBuffer[PCAP_ERRBUF_SIZE];
     bpf_u_int32 net, mask;
@@ -223,6 +228,11 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
         session->pcapHandle = pcap_open_offline(device, errorBuffer);
         ASSERT_MESSAGE(env, session->pcapHandle != nullptr, errorBuffer);
     }
+
+#if defined(_WIN32)
+    // Set min bytes
+    ASSERT_MESSAGE(env, pcap_setmintocopy(session->pcapHandle, minBytes) == 0, "Can't set the minBytes.");
+#endif
 
     if (strlen(filter) > 0) {
         struct bpf_program fp;

@@ -148,6 +148,14 @@ export interface LiveSessionOptions extends CommonSessionOptions {
      * @default true
      */
     promiscuous?: boolean
+
+    /**
+     * Set the minimum number of bytes to capture.
+     * @NOTE: Only works on Windows.
+     *
+     * @default 16000
+     */
+    minBytes?: number
 }
 
 export interface OfflineSessionOptions extends CommonSessionOptions {

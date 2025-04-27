@@ -30,6 +30,7 @@ export class NpcapSession extends TypedEventEmitter<{
             timeout = 1000,
             warningHandler = this.warningHandler,
             promiscuous = true,
+            minBytes = 16000,
         } = options
 
         this.device = device || npcap.defaultDevice() || ''
@@ -53,6 +54,7 @@ export class NpcapSession extends TypedEventEmitter<{
             timeout,
             warningHandler,
             promiscuous,
+            minBytes,
         )
     }
 

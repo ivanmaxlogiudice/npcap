@@ -21,6 +21,7 @@ export interface Session {
      * @param {number} timeout - The timeout duration for capturing packets.
      * @param {(message: string) => void} warningHandler - A callback function to handle warnings.
      * @param {boolean} promiscuous - Whether to set promiscuous mode for capturing packets.
+     * @param {number} minBytes - The minimum number of bytes to capture (Only in Windows).
      *
      * @returns {LinkType} The type of the link.
      */
@@ -36,7 +37,8 @@ export interface Session {
         monitor: boolean,
         timeout: number,
         warningHandler: (message: string) => void,
-        promiscuous: boolean
+        promiscuous: boolean,
+        minBytes: number
     ) => LinkType
 
     /**
@@ -54,6 +56,7 @@ export interface Session {
      * @param {number} timeout - The timeout duration for capturing packets.
      * @param {(message: string) => void} warningHandler - A callback function to handle warnings.
      * @param {boolean} promiscuous - Whether to set promiscuous mode for capturing packets.
+     * @param {number} minBytes - The minimum number of bytes to capture (Only in Windows).
      *
      * @returns {LinkType} The type of the link.
      */
@@ -69,7 +72,8 @@ export interface Session {
         monitor: boolean,
         timeout: number,
         warningHandler: (message: string) => void,
-        promiscuous: boolean
+        promiscuous: boolean,
+        minBytes: number
     ) => LinkType
 
     /**
