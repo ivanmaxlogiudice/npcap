@@ -1,7 +1,7 @@
 {
     "name": "node-npcap",
     "type": "module",
-    "version": "0.0.2-beta.5",
+    "version": "0.0.2-beta.6",
     "packageManager": "pnpm@10.9.0",
     "description": "Native addon to capture & decode network packets.",
     "author": "Iván Máximiliano, Lo Giudice <ivanmaxlogiudice@gmail.com>",
