@@ -4,7 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/deps/Npcap/Include",
-                "${localAppData}/node-gyp/Cache/21.6.0/include/node"
+                "${localAppData}/node-gyp/Cache/23.11.0/include/node"
             ],
             "defines": [
                 "_DEBUG",
