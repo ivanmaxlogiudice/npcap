@@ -1,20 +1,33 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-    "extends": ["config:recommended"],
-    "labels": ["dependencies"],
+    "extends": [
+        "config:recommended"
+    ],
+    "labels": [
+        "dependencies"
+    ],
     "rangeStrategy": "bump",
     "packageRules": [
         {
             "description": "Group all non-major updates weekly",
-            "extends": ["schedule:weekly"],
-            "matchPackagePatterns": ["*"],
-            "matchUpdateTypes": ["minor", "patch"],
+            "extends": [
+                "schedule:weekly"
+            ],
+            "matchUpdateTypes": [
+                "minor",
+                "patch"
+            ],
             "groupName": "all non-major dependencies",
-            "groupSlug": "all-minor-patch"
+            "groupSlug": "all-minor-patch",
+            "matchPackageNames": [
+                "*"
+            ]
         },
         {
             "description": "Suppress major updates using Dependency Dashboard",
-            "matchUpdateTypes": ["major"],
+            "matchUpdateTypes": [
+                "major"
+            ],
             "dependencyDashboardApproval": true
         }
     ]
