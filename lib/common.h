@@ -2,8 +2,8 @@
 #define NAPI_COMMON_H
 
 #include <pcap/pcap.h>
-#include <string.h>
 #include <node_api.h>
+#include <string>
 
 // Empty value so that macros here are able to return NULL or void
 #define RETVAL_NOTHING // Intentionally blank #define
@@ -78,7 +78,7 @@
 #define DECLARE_METHOD(name, fn)                                            \
     { name, 0, fn, 0, 0, 0, napi_default, 0 }
 
-const char* GetStringFromArg(napi_env env, napi_value arg);
+std::string GetStringFromArg(napi_env env, napi_value arg);
 int32_t GetNumberFromArg(napi_env env, napi_value arg);
 bool GetBooleanFromArg(napi_env env, napi_value arg);
 

@@ -188,7 +188,7 @@ napi_value findDevice(napi_env env, napi_callback_info info) {
     ASSERT_CALL(env, napi_typeof(env, args[0], &type));
     ASSERT_MESSAGE(env, napi_string == type, "The argument must be a string.");
     
-    const char* ip = GetStringFromArg(env, args[0]);
+    std::string ip = GetStringFromArg(env, args[0]);
 
     char error[PCAP_ERRBUF_SIZE] = {0};
     pcap_if_t *alldevs;
@@ -210,7 +210,7 @@ napi_value findDevice(napi_env env, napi_callback_info info) {
             if (family != AF_INET && family != AF_INET6) continue;
 
             const char *ipAddress = GetIpAddress(cur_addr->addr);
-            if (strcmp(ip, ipAddress) != 0) continue;
+            if (strcmp(ip.c_str(), ipAddress) != 0) continue;
 
             ASSERT_CALL(env, napi_create_string_utf8(env, cur_dev->name, strlen(cur_dev->name), &device));
             found = true;

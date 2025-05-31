@@ -55,8 +55,15 @@ Session::Session(): env_(nullptr), wrapper_(nullptr) {
 }
 
 Session::~Session() {
-    ASSERT_CALL_VOID(env_, napi_delete_reference(env_, wrapper_));
-    ASSERT_CALL_VOID(env_, napi_delete_reference(env_, onPacketRef));
+    if (wrapper_) {
+        ASSERT_CALL_VOID(env_, napi_delete_reference(env_, wrapper_));
+        wrapper_ = nullptr;
+    }
+    
+    if (onPacketRef) {
+        ASSERT_CALL_VOID(env_, napi_delete_reference(env_, onPacketRef));
+        onPacketRef = nullptr;
+    }
 }
 
 napi_value Session::New(napi_env env, napi_callback_info info) {
@@ -101,7 +108,7 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
     napi_value argv[12], thisArg;
     ASSERT_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisArg, nullptr));
     
-    // Verifiy arguments
+    // Verify arguments
     napi_valuetype type;
     
     // argv[0]: { device: string }
@@ -180,7 +187,7 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
     char errorBuffer[PCAP_ERRBUF_SIZE];
     bpf_u_int32 net, mask;
     if (live) {
-        if (pcap_lookupnet(device, &net, &mask, errorBuffer) == -1) {
+        if (pcap_lookupnet(device.c_str(), &net, &mask, errorBuffer) == -1) {
             net = 0;
             mask = 0;
 
@@ -189,7 +196,7 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
             ASSERT_CALL(env, napi_call_function(env, argv[10], argv[10], 1, &errorMessage, &result));
         }
 
-        session->pcapHandle = pcap_create(device, errorBuffer);
+        session->pcapHandle = pcap_create(device.c_str(), errorBuffer);
         ASSERT_MESSAGE(env, session->pcapHandle != nullptr, errorBuffer);
 
         // 64KB is the max IPv4 packet size
@@ -217,15 +224,15 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
 
         ASSERT_MESSAGE(env, pcap_activate(session->pcapHandle) == 0, pcap_geterr(session->pcapHandle));
 
-        if (strlen(outFile) > 0) {
-            session->pcapDumpHandle = pcap_dump_open(session->pcapHandle, outFile);
+        if (!outFile.empty()) {
+            session->pcapDumpHandle = pcap_dump_open(session->pcapHandle, outFile.c_str());
             ASSERT_MESSAGE(env, session->pcapDumpHandle != nullptr, "Can't open output dump file.");
         }
 
         ASSERT_MESSAGE(env, pcap_setnonblock(session->pcapHandle, 1, errorBuffer) != -1, errorBuffer);
     } else {
         // Device is the path to the savefile
-        session->pcapHandle = pcap_open_offline(device, errorBuffer);
+        session->pcapHandle = pcap_open_offline(device.c_str(), errorBuffer);
         ASSERT_MESSAGE(env, session->pcapHandle != nullptr, errorBuffer);
     }
 
@@ -234,10 +241,10 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
     ASSERT_MESSAGE(env, pcap_setmintocopy(session->pcapHandle, minBytes) == 0, "Can't set the minBytes.");
 #endif
 
-    if (strlen(filter) > 0) {
+    if (!filter.empty()) {
         struct bpf_program fp;
 
-        ASSERT_MESSAGE(env, pcap_compile(session->pcapHandle, &fp, filter, 1, net) != -1, pcap_geterr(session->pcapHandle));
+        ASSERT_MESSAGE(env, pcap_compile(session->pcapHandle, &fp, filter.c_str(), 1, net) != -1, pcap_geterr(session->pcapHandle));
         ASSERT_MESSAGE(env, pcap_setfilter(session->pcapHandle, &fp) != -1, pcap_geterr(session->pcapHandle));
 
         pcap_freecode(&fp);

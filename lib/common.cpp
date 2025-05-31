@@ -1,13 +1,14 @@
 #include "common.h"
+#include <string>
 
-const char* GetStringFromArg(napi_env env, napi_value arg) {
+std::string GetStringFromArg(napi_env env, napi_value arg) {
     size_t bufferSize;
     ASSERT_CALL(env, napi_get_value_string_utf8(env, arg, nullptr, 0, &bufferSize));
     
-    char* buffer = new char[bufferSize + 1];
-    ASSERT_CALL(env, napi_get_value_string_utf8(env, arg, buffer, bufferSize + 1, nullptr));
-
-    return buffer;
+    std::string result(bufferSize, '\0');
+    ASSERT_CALL(env, napi_get_value_string_utf8(env, arg, &result[0], bufferSize + 1, nullptr));
+    
+    return result;
 }
 
 int32_t GetNumberFromArg(napi_env env, napi_value arg) {
