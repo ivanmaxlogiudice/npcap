@@ -2,7 +2,7 @@
     "name": "node-npcap",
     "type": "module",
     "version": "0.0.2-beta.7",
-    "packageManager": "pnpm@10.11.0",
+    "packageManager": "bun@1.2.15",
     "description": "Native addon to capture & decode network packets.",
     "author": "Iván Máximiliano, Lo Giudice <ivanmaxlogiudice@gmail.com>",
     "license": "MIT",
@@ -43,11 +43,11 @@
         "lint:fix": "eslint . --fix",
         "dev": "esno examples/ethernet.ts",
         "stub": "unbuild --stub",
-        "build": "pnpm build:src && pnpm build:lib",
+        "build": "bun build:src && bun build:lib",
         "build:lib": "node-gyp rebuild -j max",
         "build:src": "unbuild",
-        "prepublishOnly": "pnpm run build",
-        "release": "bumpp && pnpm publish",
+        "prepublishOnly": "bun run build",
+        "release": "bumpp && bun publish",
         "configure": "node-gyp configure"
     },
     "devDependencies": {
@@ -58,6 +58,7 @@
         "eslint": "^9.28.0",
         "esno": "^4.8.0",
         "lint-staged": "^16.1.0",
+        "node-gyp": "^11.2.0",
         "rimraf": "^6.0.1",
         "simple-git-hooks": "^2.13.0",
         "typescript": "^5.8.3",
@@ -65,7 +66,7 @@
         "vitest": "^3.1.4"
     },
     "simple-git-hooks": {
-        "pre-commit": "pnpm lint-staged"
+        "pre-commit": "bun lint-staged"
     },
     "lint-staged": {
         "*": "eslint --fix"
