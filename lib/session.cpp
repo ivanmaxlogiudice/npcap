@@ -104,8 +104,8 @@ void Session::Destructor(napi_env env, void* nativeObject, void* /* finalizeHint
 }
 
 napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
-    size_t argc = 12;
-    napi_value argv[12], thisArg;
+    size_t argc = 13;
+    napi_value argv[13], thisArg;
     ASSERT_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisArg, nullptr));
     
     // Verify arguments
@@ -132,7 +132,7 @@ napi_value Session::Open(napi_env env, napi_callback_info info, bool live) {
     ASSERT_CALL(env, napi_is_buffer(env, argv[4], &isBuffer));
     ASSERT_MESSAGE(env, isBuffer == true, "The parameter `header` must be a Buffer.");
 
-    // argv[5]: { buffer: Buffer}
+    // argv[5]: { buffer: Buffer }
     ASSERT_CALL(env, napi_is_buffer(env, argv[5], &isBuffer));
     ASSERT_MESSAGE(env, isBuffer == true, "The parameter `buffer` must be a Buffer.");
 
