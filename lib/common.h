@@ -4,6 +4,7 @@
 #include <pcap/pcap.h>
 #include <node_api.h>
 #include <string>
+#include <cstring>
 
 // Empty value so that macros here are able to return NULL or void
 #define RETVAL_NOTHING // Intentionally blank #define
