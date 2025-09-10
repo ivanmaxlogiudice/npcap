@@ -3,6 +3,7 @@
 
 #if defined(_WIN32)
     // Windows
+    #include <memory>
     #include <windows.h>
     #include <iphlpapi.h>
     #pragma comment(lib, "iphlpapi.lib")
@@ -239,7 +240,7 @@ napi_value defaultDevice(napi_env env, napi_callback_info info) {
     ULONG bufferLength = 0;
     GetAdaptersAddresses(AF_INET, GAA_FLAG_INCLUDE_GATEWAYS | GAA_FLAG_INCLUDE_PREFIX, nullptr, nullptr, &bufferLength);
 
-    std::vector<uint8_t> buffer(bufferLength);
+    std::unique_ptr<uint8_t[]> buffer(new uint8_t[bufferLength]);
     ASSERT_MESSAGE(env, 
         GetAdaptersAddresses(AF_INET, GAA_FLAG_INCLUDE_GATEWAYS | GAA_FLAG_INCLUDE_PREFIX, 0, reinterpret_cast<IP_ADAPTER_ADDRESSES *>(&buffer[0]), &bufferLength) == ERROR_SUCCESS, 
         "Failed to get network interfaces with GetAdaptersAddresses"
