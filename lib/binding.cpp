@@ -1,14 +1,14 @@
 #include "common.h"
 #include "session.h"
 
-#if defined(__unix__)
-#include <dlfcn.h>
-#endif
-
 #if defined(_WIN32)
-#include <vector>
-#include <iphlpapi.h>
-#pragma comment(lib, "iphlpapi.lib")
+    // Windows
+    #include <windows.h>
+    #include <iphlpapi.h>
+    #pragma comment(lib, "iphlpapi.lib")
+#else
+    // Unix / Linux / macOS
+    #include <dlfcn.h>
 #endif
 
 #if defined(_WIN32)
