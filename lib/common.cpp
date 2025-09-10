@@ -1,5 +1,4 @@
 #include "common.h"
-#include <string>
 
 std::string GetStringFromArg(napi_env env, napi_value arg) {
     size_t bufferSize;
