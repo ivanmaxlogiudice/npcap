@@ -17,6 +17,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Install libraries
+        run: sudo apt install -y libpcap-dev build-essential
+
       - name: Install bun
         uses: oven-sh/setup-bun@v2
 
